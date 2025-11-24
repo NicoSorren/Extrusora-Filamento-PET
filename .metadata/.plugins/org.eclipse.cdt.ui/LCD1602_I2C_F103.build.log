@@ -1,0 +1,10 @@
+18:28:32 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
+make -j16 all 
+arm-none-eabi-size  LCD1602_I2C_F103.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
+Finished building: default.size.stdout
+ 
+
+18:28:32 Build Finished. 0 errors, 0 warnings. (took 194ms)
+

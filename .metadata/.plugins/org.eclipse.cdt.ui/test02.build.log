@@ -1,0 +1,18 @@
+20:22:19 **** Incremental Build of configuration Debug for project test02 ****
+make -j16 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:35:29: error: 'Led_GPIO_Port' undeclared (first use in this function); did you mean 'LED_GPIO_Port'?
+   35 |           HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
+      |                             ^~~~~~~~~~~~~
+      |                             LED_GPIO_Port
+../Core/Src/main.c:35:29: note: each undeclared identifier is reported only once for each function it appears in
+../Core/Src/main.c:35:44: error: 'Led_Pin' undeclared (first use in this function); did you mean 'LED_Pin'?
+   35 |           HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
+      |                                            ^~~~~~~
+      |                                            LED_Pin
+make: *** [Core/Src/subdir.mk:37: Core/Src/main.o] Error 1
+"make -j16 all" terminated with exit code 2. Build might be incomplete.
+
+20:22:20 Build Failed. 3 errors, 0 warnings. (took 367ms)
+

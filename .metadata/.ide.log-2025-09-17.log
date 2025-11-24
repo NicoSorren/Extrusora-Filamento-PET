@@ -1,0 +1,9 @@
+2025-09-17 12:57:07,662 [INFO] LogOutputStream:77 - [STDOUT_REDIRECT] 
+2025-09-17 12:57:08,585 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 1329mS.
+2025-09-17 12:57:08,587 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 1mS.
+2025-09-17 12:57:08,588 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 0mS.
+2025-09-17 16:38:12,274 [INFO] WebApp:194 - Connection lost
+2025-09-17 16:38:12,565 [INFO] WebApp:191 - Connection restablished
+2025-09-17 16:38:15,387 [INFO] WebApp:194 - Connection lost
+2025-09-17 16:38:15,478 [INFO] WebApp:191 - Connection restablished
+2025-09-17 23:46:20,605 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 

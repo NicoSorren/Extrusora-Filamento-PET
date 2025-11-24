@@ -1,0 +1,42 @@
+2025-08-27 09:06:27,275 [INFO] WebApp:194 - Connection lost
+2025-08-27 09:06:27,702 [INFO] WebApp:191 - Connection restablished
+2025-08-27 09:06:29,507 [INFO] WebApp:194 - Connection lost
+2025-08-27 09:06:29,699 [INFO] WebApp:191 - Connection restablished
+2025-08-27 10:15:04,666 [INFO] Gpio:278 - dependency for GPIO [RCC, SYS]
+2025-08-27 10:21:42,565 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 356267936 Bytes (646971392)
+2025-08-27 10:21:42,733 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 369377184 Bytes (646971392)
+2025-08-27 10:21:47,610 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 486291360 Bytes (646971392)
+2025-08-27 10:21:48,536 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2025-08-27 10:21:48,536 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2025-08-27 10:21:48,538 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2025-08-27 10:21:48,539 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2025-08-27 10:21:48,539 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2025-08-27 10:21:48,544 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2025-08-27 10:21:48,781 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\license.tmp_save
+2025-08-27 10:21:49,269 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\license.tmp
+2025-08-27 10:21:49,565 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\gpio.tmp_save
+2025-08-27 10:21:49,777 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\gpio.tmp
+2025-08-27 10:21:49,984 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\stm32f1xx_it.c_save
+2025-08-27 10:21:50,140 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\stm32f1xx_it.c
+2025-08-27 10:21:50,151 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\stm32f1xx_it.h_save
+2025-08-27 10:21:50,250 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\stm32f1xx_it.h
+2025-08-27 10:21:50,281 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\stm32f1xx_hal_msp.c_save
+2025-08-27 10:21:50,480 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\stm32f1xx_hal_msp.c
+2025-08-27 10:21:50,497 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\system.tmp_save
+2025-08-27 10:21:50,578 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\MXTmpFiles\system.tmp
+2025-08-27 10:21:50,595 [INFO] CodeEngine:321 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\stm32f1xx_hal_conf.h_save
+2025-08-27 10:21:50,685 [INFO] CodeEngine:345 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\stm32f1xx_hal_conf.h
+2025-08-27 10:21:50,768 [INFO] ApiDbMcu:532 - Load IP Config File for TIM1
+2025-08-27 10:21:50,773 [INFO] ApiDbMcu:532 - Load IP Config File for RCC
+2025-08-27 10:21:50,778 [WARN] IPConfigManager:3811 - IP not found : TIM
+2025-08-27 10:21:50,779 [WARN] CodeGenerator:4259 - IP not found : null
+2025-08-27 10:21:50,794 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\main.h_save
+2025-08-27 10:21:50,909 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Inc\main.h
+2025-08-27 10:21:50,922 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\main.c_save
+2025-08-27 10:21:51,127 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper\Core\Src\main.c
+2025-08-27 10:21:51,569 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 161mS.
+2025-08-27 10:21:51,580 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2025-08-27 10:21:51,659 [INFO] ConfigFileManager:1595 - The Die is : DIE410
+2025-08-27 10:21:51,676 [INFO] ApiDbMcu:532 - Load IP Config File for FATFS
+2025-08-27 10:21:51,681 [INFO] ApiDbMcu:532 - Load IP Config File for FREERTOS
+2025-08-27 10:21:51,688 [INFO] ApiDbMcu:532 - Load IP Config File for USB_DEVICE

@@ -1,0 +1,10 @@
+../Core/Src/main.c:73:6:microDelay	2
+../Core/Src/main.c:80:20:step_pulse	1
+../Core/Src/main.c:88:23:button_pressed	3
+../Core/Src/main.c:97:13:wait_press_and_release	3
+../Core/Src/main.c:107:6:run_extrusion_until_stop	8
+../Core/Src/main.c:147:5:main	1
+../Core/Src/main.c:184:6:SystemClock_Config	3
+../Core/Src/main.c:212:13:MX_TIM1_Init	4
+../Core/Src/main.c:237:13:MX_GPIO_Init	1
+../Core/Src/main.c:271:6:Error_Handler	1

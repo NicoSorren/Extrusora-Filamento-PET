@@ -1,0 +1,200 @@
+13:04:25 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+make -j16 all 
+arm-none-eabi-gcc "../Core/Src/adc.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/adc.d" -MT"Core/Src/adc.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/adc.o"
+arm-none-eabi-gcc "../Core/Src/gpio.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/gpio.d" -MT"Core/Src/gpio.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/gpio.o"
+arm-none-eabi-gcc "../Core/Src/i2c-lcd.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/i2c-lcd.d" -MT"Core/Src/i2c-lcd.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/i2c-lcd.o"
+arm-none-eabi-gcc "../Core/Src/i2c.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/i2c.d" -MT"Core/Src/i2c.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/i2c.o"
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/stm32f1xx_hal_msp.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32f1xx_hal_msp.d" -MT"Core/Src/stm32f1xx_hal_msp.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32f1xx_hal_msp.o"
+arm-none-eabi-gcc "../Core/Src/stm32f1xx_it.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32f1xx_it.d" -MT"Core/Src/stm32f1xx_it.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32f1xx_it.o"
+arm-none-eabi-gcc "../Core/Src/tim.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/tim.d" -MT"Core/Src/tim.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/tim.o"
+arm-none-eabi-gcc -o "Temp_Prueba.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Temp_Prueba.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Temp_Prueba.elf
+ 
+arm-none-eabi-size  Temp_Prueba.elf 
+arm-none-eabi-objdump -h -S Temp_Prueba.elf  > "Temp_Prueba.list"
+arm-none-eabi-objcopy  -O ihex Temp_Prueba.elf  "Temp_Prueba.hex"
+   text	   data	    bss	    dec	    hex	filename
+  39656	    476	   2132	  42264	   a518	Temp_Prueba.elf
+Finished building: default.size.stdout
+ 
+Finished building: Temp_Prueba.hex
+ 
+Finished building: Temp_Prueba.list
+ 
+18:19:38 **** Build of configuration Debug for project LCD ****
+make -j16 all 
+arm-none-eabi-size  LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10828	     92	   2012	  12932	   3284	LCD.elf
+Finished building: default.size.stdout
+ 
+18:19:39 **** Build of configuration Debug for project LCD1602_I2C_F103 ****
+make -j16 all 
+arm-none-eabi-size  LCD1602_I2C_F103.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
+Finished building: default.size.stdout
+ 
+
+**** Build of configuration Debug for project ProjectVS ****
+
+Nothing to build for project ProjectVS
+
+**** Build of configuration Debug for project ProyectoVS ****
+
+Nothing to build for project ProyectoVS
+18:19:40 **** Build of configuration Debug for project Temp_Prueba ****
+make -j16 all 
+arm-none-eabi-size  Temp_Prueba.elf 
+   text	   data	    bss	    dec	    hex	filename
+  39656	    476	   2132	  42264	   a518	Temp_Prueba.elf
+Finished building: default.size.stdout
+ 
+18:19:40 **** Build of configuration Debug for project Test_LCD ****
+make -j16 all 
+arm-none-eabi-size  Test_LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+   5372	     12	   1652	   7036	   1b7c	Test_LCD.elf
+Finished building: default.size.stdout
+ 
+18:19:40 **** Build of configuration Debug for project stepper ****
+make -j16 all 
+arm-none-eabi-size  stepper.elf 
+   text	   data	    bss	    dec	    hex	filename
+   6884	     12	   1644	   8540	   215c	stepper.elf
+Finished building: default.size.stdout
+ 
+18:19:41 **** Build of configuration Debug for project stepper_timer ****
+make -j16 all 
+arm-none-eabi-size  stepper_timer.elf 
+   text	   data	    bss	    dec	    hex	filename
+   9852	     12	   1644	  11508	   2cf4	stepper_timer.elf
+Finished building: default.size.stdout
+ 
+18:23:49 **** Incremental Build of configuration Debug for project LCD ****
+make -j16 all 
+arm-none-eabi-size  LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10828	     92	   2012	  12932	   3284	LCD.elf
+Finished building: default.size.stdout
+ 
+18:23:49 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
+make -j16 all 
+arm-none-eabi-size  LCD1602_I2C_F103.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
+Finished building: default.size.stdout
+ 
+18:23:49 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+make -j16 all 
+arm-none-eabi-size  Temp_Prueba.elf 
+   text	   data	    bss	    dec	    hex	filename
+  39656	    476	   2132	  42264	   a518	Temp_Prueba.elf
+Finished building: default.size.stdout
+ 
+18:23:50 **** Incremental Build of configuration Debug for project Test_LCD ****
+make -j16 all 
+arm-none-eabi-size  Test_LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+   5372	     12	   1652	   7036	   1b7c	Test_LCD.elf
+Finished building: default.size.stdout
+ 
+18:23:50 **** Incremental Build of configuration Debug for project stepper ****
+make -j16 all 
+arm-none-eabi-size  stepper.elf 
+   text	   data	    bss	    dec	    hex	filename
+   6884	     12	   1644	   8540	   215c	stepper.elf
+Finished building: default.size.stdout
+ 
+18:23:50 **** Incremental Build of configuration Debug for project stepper_timer ****
+make -j16 all 
+arm-none-eabi-size  stepper_timer.elf 
+   text	   data	    bss	    dec	    hex	filename
+   9852	     12	   1644	  11508	   2cf4	stepper_timer.elf
+Finished building: default.size.stdout
+ 
+18:25:29 **** Incremental Build of configuration Debug for project LCD ****
+make -j16 all 
+arm-none-eabi-size  LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10828	     92	   2012	  12932	   3284	LCD.elf
+Finished building: default.size.stdout
+ 
+18:25:29 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
+make -j16 all 
+arm-none-eabi-size  LCD1602_I2C_F103.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
+Finished building: default.size.stdout
+ 
+18:25:29 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+make -j16 all 
+arm-none-eabi-size  Temp_Prueba.elf 
+   text	   data	    bss	    dec	    hex	filename
+  39656	    476	   2132	  42264	   a518	Temp_Prueba.elf
+Finished building: default.size.stdout
+ 
+18:25:30 **** Incremental Build of configuration Debug for project Test_LCD ****
+make -j16 all 
+arm-none-eabi-size  Test_LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+   5372	     12	   1652	   7036	   1b7c	Test_LCD.elf
+Finished building: default.size.stdout
+ 
+18:25:30 **** Incremental Build of configuration Debug for project stepper ****
+make -j16 all 
+arm-none-eabi-size  stepper.elf 
+   text	   data	    bss	    dec	    hex	filename
+   6884	     12	   1644	   8540	   215c	stepper.elf
+Finished building: default.size.stdout
+ 
+18:25:30 **** Incremental Build of configuration Debug for project stepper_timer ****
+make -j16 all 
+arm-none-eabi-size  stepper_timer.elf 
+   text	   data	    bss	    dec	    hex	filename
+   9852	     12	   1644	  11508	   2cf4	stepper_timer.elf
+Finished building: default.size.stdout
+ 
+18:28:32 **** Incremental Build of configuration Debug for project LCD ****
+make -j16 all 
+arm-none-eabi-size  LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10828	     92	   2012	  12932	   3284	LCD.elf
+Finished building: default.size.stdout
+ 
+18:28:32 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
+make -j16 all 
+arm-none-eabi-size  LCD1602_I2C_F103.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
+Finished building: default.size.stdout
+ 
+18:28:32 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+make -j16 all 
+arm-none-eabi-size  Temp_Prueba.elf 
+   text	   data	    bss	    dec	    hex	filename
+  39656	    476	   2132	  42264	   a518	Temp_Prueba.elf
+Finished building: default.size.stdout
+ 
+18:28:33 **** Incremental Build of configuration Debug for project Test_LCD ****
+make -j16 all 
+arm-none-eabi-size  Test_LCD.elf 
+   text	   data	    bss	    dec	    hex	filename
+   5372	     12	   1652	   7036	   1b7c	Test_LCD.elf
+Finished building: default.size.stdout
+ 
+18:28:33 **** Incremental Build of configuration Debug for project stepper ****
+make -j16 all 
+arm-none-eabi-size  stepper.elf 
+   text	   data	    bss	    dec	    hex	filename
+   6884	     12	   1644	   8540	   215c	stepper.elf
+Finished building: default.size.stdout
+ 
+18:28:33 **** Incremental Build of configuration Debug for project stepper_timer ****
+make -j16 all 
+arm-none-eabi-size  stepper_timer.elf 
+   text	   data	    bss	    dec	    hex	filename
+   9852	     12	   1644	  11508	   2cf4	stepper_timer.elf
+Finished building: default.size.stdout
+ 

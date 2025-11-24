@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<item key="replaceBarOpen" value="false"/>
+	<list key="searchhistory">
+		<item value="HAL_TIM_PeriodElapsedCallback"/>
+		<item value="flag_10ms"/>
+		<item value="mx_gpio_ini"/>
+		<item value="HAL_GPIO_Init"/>
+		<item value="mx_adc1"/>
+		<item value="PIN_"/>
+		<item value="mx_gpio"/>
+		<item value="Hal_tim"/>
+		<item value="user code pv"/>
+		<item value="user code "/>
+		<item value="htim"/>
+		<item value="static voi"/>
+		<item value="delay"/>
+		<item value="adc_read"/>
+		<item value="d_targe"/>
+	</list>
+</section>
