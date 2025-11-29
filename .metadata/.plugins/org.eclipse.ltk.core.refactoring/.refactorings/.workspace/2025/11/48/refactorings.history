@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;stepper_timer/Debug/stepper_timer.hex&apos;" deleteContents="false" description="Delete resource &apos;stepper_timer/Debug/stepper_timer.hex&apos;" element1="/stepper_timer/Debug/stepper_timer.hex" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1764280566798"/>&#x0A;<refactoring comment="Delete resource &apos;stepper_def/Debug/stepper_def.hex&apos;" deleteContents="false" description="Delete resource &apos;stepper_def/Debug/stepper_def.hex&apos;" element1="/stepper_def/Debug/stepper_def.hex" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1764280652549"/>
+</session>

@@ -1,0 +1,303 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "tim.h"
+#include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+// --- CONFIGURACIÓN ---
+const uint16_t MIN_SPEED = 100;   // Hz inicial
+const uint16_t MAX_SPEED = 800;   // Hz final
+const uint16_t RAMP_STEP = 10;    // Cuánto aumentar por salto (Hz)
+const uint32_t RAMP_DELAY = 5;    // Tiempo entre saltos (ms)
+
+// --- ESTADOS ---
+typedef enum {
+    STATE_IDLE = 0,
+    STATE_ACCEL,
+    STATE_RUNNING,
+    STATE_DECEL
+} MotorState;
+
+MotorState motor_state = STATE_IDLE;
+uint16_t current_speed = 0;
+uint32_t last_tick_time = 0;      // Para recordar la hora del último cambio
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+void set_motor_speed(uint16_t steps_per_second)
+{
+	// 1. Protección: Evitar división por cero o velocidades negativas, forzamos a 1hz para no dividir por 0
+	if (steps_per_second < 1) steps_per_second = 1;
+
+	// 2. Calcular el nuevo límite del contador (ARR)
+	    // Fórmula: (Reloj_Timer / Frecuencia) - 1
+	    // Nuestro Reloj_Timer es 1 MHz (1,000,000)
+		// Si queremos X pasos por segundo, dividimos el millón por X.
+	uint32_t new_arr = (1000000/steps_per_second) - 1;
+
+	// 3. Aplicamos el cambio al Hardware del Timer 2
+	__HAL_TIM_SET_AUTORELOAD(&htim2, new_arr);
+
+	// 4. Ajustamos el "Pulso" (CCR) a la mitad del nuevo periodo
+	// Esto mantiene la onda cuadrada perfecta (50% encendido, 50% apagado)
+	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, new_arr / 2);
+
+}
+
+// --- Función de ACELERACIÓN (Ramp Up) ---
+void motor_ramp_up(uint16_t start_freq, uint16_t target_freq)
+{
+	// 1. Encendemos el Timer (El motor empieza a recibir pulsos)
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+
+	// 2. Bucle de aceleración
+	// Empezamos en 'start_freq' y subimos hasta 'target_freq'
+
+}
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_TIM2_Init();
+  /* USER CODE BEGIN 2 */
+  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+        // ====================================================
+        // 1. LECTURA DE BOTONES (INPUTS)
+        // ====================================================
+
+        // Botón START (PA4): Si se pulsa y estamos parados -> Pasar a ACELERAR
+        if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4) == GPIO_PIN_RESET) {
+            if (motor_state == STATE_IDLE) {
+                motor_state = STATE_ACCEL;
+                current_speed = MIN_SPEED;
+                HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3); // Encender Timer
+                last_tick_time = HAL_GetTick(); // Tomar hora actual
+            }
+        }
+
+        // Botón STOP (PA3): Si se pulsa y estamos moviéndonos -> Pasar a FRENAR
+        if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
+            if (motor_state == STATE_RUNNING || motor_state == STATE_ACCEL) {
+                motor_state = STATE_DECEL;
+            }
+        }
+
+        // ====================================================
+        // 2. MÁQUINA DE ESTADOS (LÓGICA DE CONTROL)
+        // ====================================================
+
+        switch (motor_state) {
+
+            case STATE_IDLE:
+                // No hacemos nada. El motor está apagado.
+                // Aquí la CPU está libre para leer temperatura, LCD, etc.
+                break;
+
+            case STATE_ACCEL:
+                // Chequeamos el reloj: ¿Pasaron 5ms?
+                if (HAL_GetTick() - last_tick_time >= RAMP_DELAY) {
+                    last_tick_time = HAL_GetTick(); // Actualizamos marca de tiempo
+
+                    // Aumentamos velocidad
+                    if (current_speed < MAX_SPEED) {
+                        current_speed += RAMP_STEP;
+                        set_motor_speed(current_speed); // Tu función auxiliar
+                    } else {
+                        // Llegamos a la meta -> Cambiar a modo CRUCERO
+                        motor_state = STATE_RUNNING;
+                    }
+                }
+                break;
+
+            case STATE_RUNNING:
+                // Velocidad constante.
+                // CPU libre para otras tareas críticas.
+                break;
+
+            case STATE_DECEL:
+                // Chequeamos el reloj: ¿Pasaron 5ms?
+                if (HAL_GetTick() - last_tick_time >= RAMP_DELAY) {
+                    last_tick_time = HAL_GetTick();
+
+                    // Bajamos velocidad
+                    if (current_speed > MIN_SPEED) {
+                        current_speed -= RAMP_STEP;
+                        set_motor_speed(current_speed);
+                    } else {
+                        // Llegamos al mínimo -> APAGAR
+                        HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_3);
+                        motor_state = STATE_IDLE;
+                    }
+                }
+                break;
+        }
+
+        // ====================================================
+        // 3. AQUÍ IRÍAN OTRAS TAREAS (FUTURO)
+        // ====================================================
+        // leer_temperatura();
+        // actualizar_lcd();
+        // verificar_atascos();
+
+      /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+#ifdef USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
