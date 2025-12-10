@@ -265,8 +265,8 @@ int main(void)
   MX_TIM2_Init();
  800023c:	f000 f972 	bl	8000524 <MX_TIM2_Init>
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
- 8000240:	2201      	movs	r2, #1
+  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+ 8000240:	2200      	movs	r2, #0
  8000242:	2102      	movs	r1, #2
  8000244:	485a      	ldr	r0, [pc, #360]	@ (80003b0 <main+0x184>)
  8000246:	f000 fd36 	bl	8000cb6 <HAL_GPIO_WritePin>

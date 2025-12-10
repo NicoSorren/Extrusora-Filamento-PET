@@ -1,0 +1,72 @@
+2025-12-07 11:25:17,913 [INFO] WebApp:194 - Connection lost
+2025-12-07 11:25:20,638 [INFO] WebApp:191 - Connection restablished
+2025-12-07 11:40:54,689 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,690 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,690 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,690 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,725 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,725 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,747 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-12-07 11:40:54,747 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-12-07 11:41:01,322 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2025-12-07 11:41:20,476 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2025-12-07 11:49:37,718 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 587426912 Bytes (1073741824)
+2025-12-07 11:49:37,832 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 601283952 Bytes (1073741824)
+2025-12-07 11:49:39,765 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 651912288 Bytes (1073741824)
+2025-12-07 11:49:40,212 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2025-12-07 11:49:40,212 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: DMA
+2025-12-07 11:49:40,212 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2025-12-07 11:49:40,212 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2025-12-07 11:49:40,212 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2025-12-07 11:49:40,213 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: ADC
+2025-12-07 11:49:40,213 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2025-12-07 11:49:40,213 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: I2C
+2025-12-07 11:49:40,214 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2025-12-07 11:49:40,229 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-12-07 11:49:40,229 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-12-07 11:49:40,337 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\MXTmpFiles\license.tmp_save
+2025-12-07 11:49:40,805 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\MXTmpFiles\license.tmp
+2025-12-07 11:49:40,995 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\gpio.c_save
+2025-12-07 11:49:41,118 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\gpio.c
+2025-12-07 11:49:41,128 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\gpio.h_save
+2025-12-07 11:49:41,184 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\gpio.h
+2025-12-07 11:49:41,341 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\adc.c_save
+2025-12-07 11:49:41,464 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\adc.c
+2025-12-07 11:49:41,472 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\adc.h_save
+2025-12-07 11:49:41,525 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\adc.h
+2025-12-07 11:49:41,542 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\dma.c_save
+2025-12-07 11:49:41,603 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\dma.c
+2025-12-07 11:49:41,611 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\dma.h_save
+2025-12-07 11:49:41,657 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\dma.h
+2025-12-07 11:49:41,669 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\i2c.c_save
+2025-12-07 11:49:41,735 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\i2c.c
+2025-12-07 11:49:41,742 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\i2c.h_save
+2025-12-07 11:49:41,790 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\i2c.h
+2025-12-07 11:49:41,802 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\tim.c_save
+2025-12-07 11:49:41,868 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\tim.c
+2025-12-07 11:49:41,874 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\tim.h_save
+2025-12-07 11:49:41,917 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\tim.h
+2025-12-07 11:49:41,930 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\stm32f1xx_it.c_save
+2025-12-07 11:49:41,988 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\stm32f1xx_it.c
+2025-12-07 11:49:41,995 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\stm32f1xx_it.h_save
+2025-12-07 11:49:42,034 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\stm32f1xx_it.h
+2025-12-07 11:49:42,047 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\stm32f1xx_hal_msp.c_save
+2025-12-07 11:49:42,102 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\stm32f1xx_hal_msp.c
+2025-12-07 11:49:42,107 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\MXTmpFiles\system.tmp_save
+2025-12-07 11:49:42,143 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\MXTmpFiles\system.tmp
+2025-12-07 11:49:42,155 [INFO] CodeEngine:321 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\stm32f1xx_hal_conf.h_save
+2025-12-07 11:49:42,217 [INFO] CodeEngine:345 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\stm32f1xx_hal_conf.h
+2025-12-07 11:49:42,246 [INFO] ApiDbMcu:532 - Load IP Config File for ADC1
+2025-12-07 11:49:42,249 [INFO] ApiDbMcu:532 - Load IP Config File for I2C1
+2025-12-07 11:49:42,257 [INFO] ApiDbMcu:532 - Load IP Config File for TIM3
+2025-12-07 11:49:42,260 [INFO] ApiDbMcu:532 - Load IP Config File for RCC
+2025-12-07 11:49:42,270 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\main.h_save
+2025-12-07 11:49:42,330 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Inc\main.h
+2025-12-07 11:49:42,336 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\main.c_save
+2025-12-07 11:49:42,412 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\Temp_Prueba\Core\Src\main.c
+2025-12-07 11:49:42,687 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 152mS.
+2025-12-07 11:49:42,693 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2025-12-07 11:49:42,738 [INFO] ConfigFileManager:1595 - The Die is : DIE410
+2025-12-07 11:49:42,744 [INFO] ApiDbMcu:532 - Load IP Config File for FATFS
+2025-12-07 11:49:42,748 [INFO] ApiDbMcu:532 - Load IP Config File for FREERTOS
+2025-12-07 11:49:42,752 [INFO] ApiDbMcu:532 - Load IP Config File for USB_DEVICE

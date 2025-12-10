@@ -1,63 +1,70 @@
-17:38:39 **** Incremental Build of configuration Debug for project stepper_def ****
+21:03:43 **** Incremental Build of configuration Debug for project PET_Extruder ****
 make -j16 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc -o "stepper_def.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\stepper_def\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stepper_def.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: stepper_def.elf
+arm-none-eabi-gcc -o "PET_Extruder.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PET_Extruder.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: PET_Extruder.elf
  
-arm-none-eabi-size  stepper_def.elf 
-arm-none-eabi-objdump -h -S stepper_def.elf  > "stepper_def.list"
-arm-none-eabi-objcopy  -O ihex stepper_def.elf  "stepper_def.hex"
+arm-none-eabi-size  PET_Extruder.elf 
+arm-none-eabi-objdump -h -S PET_Extruder.elf  > "PET_Extruder.list"
+arm-none-eabi-objcopy  -O ihex PET_Extruder.elf  "PET_Extruder.hex"
    text	   data	    bss	    dec	    hex	filename
-   8652	     12	   1652	  10316	   284c	stepper_def.elf
+  40732	    504	   2512	  43748	   aae4	PET_Extruder.elf
 Finished building: default.size.stdout
  
-Finished building: stepper_def.hex
+Finished building: PET_Extruder.hex
  
-Finished building: stepper_def.list
+Finished building: PET_Extruder.list
  
-17:38:53 **** Incremental Build of configuration Debug for project LCD ****
+21:04:01 **** Incremental Build of configuration Debug for project LCD ****
 make -j16 all 
 arm-none-eabi-size  LCD.elf 
    text	   data	    bss	    dec	    hex	filename
   10828	     92	   2012	  12932	   3284	LCD.elf
 Finished building: default.size.stdout
  
-17:38:53 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
+21:04:01 **** Incremental Build of configuration Debug for project LCD1602_I2C_F103 ****
 make -j16 all 
 arm-none-eabi-size  LCD1602_I2C_F103.elf 
    text	   data	    bss	    dec	    hex	filename
   21712	    468	   1988	  24168	   5e68	LCD1602_I2C_F103.elf
 Finished building: default.size.stdout
  
-17:38:54 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+21:04:02 **** Incremental Build of configuration Debug for project PET_Extruder ****
+make -j16 all 
+arm-none-eabi-size  PET_Extruder.elf 
+   text	   data	    bss	    dec	    hex	filename
+  40732	    504	   2512	  43748	   aae4	PET_Extruder.elf
+Finished building: default.size.stdout
+ 
+21:04:02 **** Incremental Build of configuration Debug for project Temp_Prueba ****
 make -j16 all 
 arm-none-eabi-size  Temp_Prueba.elf 
    text	   data	    bss	    dec	    hex	filename
-  39720	    476	   2132	  42328	   a558	Temp_Prueba.elf
+  41192	    476	   2332	  44000	   abe0	Temp_Prueba.elf
 Finished building: default.size.stdout
  
-17:38:54 **** Incremental Build of configuration Debug for project Test_LCD ****
+21:04:02 **** Incremental Build of configuration Debug for project Test_LCD ****
 make -j16 all 
 arm-none-eabi-size  Test_LCD.elf 
    text	   data	    bss	    dec	    hex	filename
    5372	     12	   1652	   7036	   1b7c	Test_LCD.elf
 Finished building: default.size.stdout
  
-17:38:54 **** Incremental Build of configuration Debug for project stepper ****
+21:04:02 **** Incremental Build of configuration Debug for project stepper ****
 make -j16 all 
 arm-none-eabi-size  stepper.elf 
    text	   data	    bss	    dec	    hex	filename
    6884	     12	   1644	   8540	   215c	stepper.elf
 Finished building: default.size.stdout
  
-17:38:55 **** Incremental Build of configuration Debug for project stepper_def ****
+21:04:03 **** Incremental Build of configuration Debug for project stepper_def ****
 make -j16 all 
 arm-none-eabi-size  stepper_def.elf 
    text	   data	    bss	    dec	    hex	filename
    8652	     12	   1652	  10316	   284c	stepper_def.elf
 Finished building: default.size.stdout
  
-17:38:55 **** Incremental Build of configuration Debug for project stepper_timer ****
+21:04:03 **** Incremental Build of configuration Debug for project stepper_timer ****
 make -j16 all 
 arm-none-eabi-size  stepper_timer.elf 
    text	   data	    bss	    dec	    hex	filename

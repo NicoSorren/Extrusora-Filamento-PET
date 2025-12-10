@@ -1,10 +1,10 @@
-17:38:54 **** Incremental Build of configuration Debug for project Temp_Prueba ****
+21:04:02 **** Incremental Build of configuration Debug for project Temp_Prueba ****
 make -j16 all 
 arm-none-eabi-size  Temp_Prueba.elf 
    text	   data	    bss	    dec	    hex	filename
-  39720	    476	   2132	  42328	   a558	Temp_Prueba.elf
+  41192	    476	   2332	  44000	   abe0	Temp_Prueba.elf
 Finished building: default.size.stdout
  
 
-17:38:54 Build Finished. 0 errors, 0 warnings. (took 326ms)
+21:04:02 Build Finished. 0 errors, 0 warnings. (took 196ms)
 

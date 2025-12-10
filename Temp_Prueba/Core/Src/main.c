@@ -16,8 +16,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -38,15 +40,15 @@
 // --- NTC y divisor (pull-up: Rfix a 3.3V, NTC a GND) ---
 #define VREF    3.3f
 #define ADCMAX  4095.0f
-#define RFIX    10000.0f      // 10kΩ a 3.3V
+#define RFIX    1000.0f      // 10kΩ a 3.3V
 #define R0_NTC  100000.0f     // 100kΩ @ 25°C
 #define T0_K    298.15f       // 25°C
 #define BETA    3950.0f       // típico B3950
 
 // --- Parámetros de control térmico ---
-#define T_SET_C     245.0f    // Setpoint (°C)
-#define T_HYST_C      2.0f    // Histéresis ± (°C)
-#define T_MAX_C     270.0f    // Corte por seguridad (°C)
+#define TEMP_TARGET  245      // Setpoint (°C) - Formato entero para UART
+#define HYST         2        // Histéresis (°C)
+#define TEMP_MAX     270      // Corte por seguridad (°C)
 
 // --- Configuración DMA ---
 #define ADC_SAMPLES 32        // Cantidad de muestras por lectura
@@ -63,40 +65,55 @@ static inline void heater_set(bool on) {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-volatile uint8_t flag_10ms = 0, flag_100ms = 0, flag_1s = 0;   // generadas por TIM3
-static float v_filt = 0.0f;                                     // EMA de voltaje
+volatile uint8_t flag_100ms = 0;   // Solo usamos esta flag
+static float v_filt = 0.0f;                                     
+
+volatile uint16_t adc_buffer[ADC_SAMPLES]; 
+volatile bool adc_conversion_complete = false; 
+
+// --- UART Debug ---
+char uart_buffer[128];  // Buffer para mensajes UART
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-static uint16_t adc_read_once(void);
-static uint16_t adc_read_avg(uint8_t n);
+static uint16_t process_adc_buffer(void);
 static float    ntc_temp_c_from_adc(uint16_t adc);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// Lee 1 vez ADC
-static uint16_t adc_read_once(void) {
-  HAL_ADC_Start(&hadc1);
-  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-  uint16_t v = (uint16_t)HAL_ADC_GetValue(&hadc1);
-  HAL_ADC_Stop(&hadc1);
-  return v;
+
+/* USER CODE BEGIN 0 */
+
+// Esta función es el "Callback". El sistema la llama automáticamente
+// cuando el DMA termina de llenar el buffer.
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+    if (hadc->Instance == ADC1) {
+        adc_conversion_complete = true; // ¡Avisar al Chef que los datos están listos!
+    }
 }
 
-// Promedio robusto con descarte min/max
-static uint16_t adc_read_avg(uint8_t n) {
-  uint32_t acc = 0; uint16_t vmin = 0xFFFF, vmax = 0;
-  for (uint8_t i = 0; i < n; i++) {
-    uint16_t v = adc_read_once();
+// Procesa el buffer lleno (calcula promedio descartando extremos)
+// Esto es pura matemática, no toca el hardware, así que es rapidísimo.
+static uint16_t process_adc_buffer(void) {
+  uint32_t acc = 0; 
+  uint16_t vmin = 0xFFFF, vmax = 0;
+  
+  for (uint8_t i = 0; i < ADC_SAMPLES; i++) {
+    uint16_t v = adc_buffer[i];
     if (v < vmin) vmin = v;
     if (v > vmax) vmax = v;
     acc += v;
   }
-  if (n > 2) { acc -= vmin + vmax; return (uint16_t)(acc / (n - 2)); }
-  return (uint16_t)(acc / n);
+  
+  if (ADC_SAMPLES > 2) { 
+      acc -= (vmin + vmax); 
+      return (uint16_t)(acc / (ADC_SAMPLES - 2)); 
+  }
+  return (uint16_t)(acc / ADC_SAMPLES);
 }
 
 // ADC -> Voltaje -> R_NTC -> Temperatura (modelo Beta)
@@ -139,9 +156,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_TIM3_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   // Calibración del ADC (F103): una vez antes de medir
   HAL_ADCEx_Calibration_Start(&hadc1);
@@ -164,58 +183,73 @@ int main(void)
   static bool heater_on = false;
   v_filt = 0.0f;
 
-  while (1)
-  {
-    if (flag_100ms) {
-      flag_100ms = 0;
 
-      // 1) Lectura estable del ADC
-      uint16_t adc = adc_read_avg(32);
-
-      // 2) Voltaje + EMA (presentación)
-      float v  = adc_to_voltage(adc);
-      const float alpha_V = 0.10f;          // 0.08–0.12
-      v_filt = (1.0f - alpha_V) * v_filt + alpha_V * v;
-
-      // 3) Convertir a °C
-      float tc = ntc_temp_c_from_adc(adc);
-
-      // 4) EMA de temperatura
-      const float alpha_T = 0.10f;          // 0.08 si querés más calma
-      if (isnan(tc_filt)) tc_filt = tc; else tc_filt += alpha_T * (tc - tc_filt);
-
-      // 5) Control ON/OFF con histéresis + seguridad
-      bool sensor_ok = !isnan(tc_filt);
-      bool overtemp  = sensor_ok && (tc_filt > T_MAX_C);
-      if (!sensor_ok || overtemp) {
-        heater_on = false;                  // seguridad
-      } else {
-        if (!heater_on && (tc_filt <= (T_SET_C - T_HYST_C))) heater_on = true;
-        else if (heater_on && (tc_filt >= (T_SET_C + T_HYST_C))) heater_on = false;
-      }
-      heater_set(heater_on);
-
-      // 6) Display con deadband ±0.10 °C y rate-limit 1 s
-      uint32_t now = HAL_GetTick();
-      bool debe_refrescar = isnan(tc_disp)
-                         || fabsf(tc_filt - tc_disp) >= 0.10f
-                         || (now - t_last) >= 1000;
-      if (debe_refrescar) {
-        tc_disp = tc_filt; t_last = now;
-        if (isnan(tc_disp)) snprintf(line1, sizeof(line1), "T:  ---.- C   ");
-        else                snprintf(line1, sizeof(line1), "T:%7.1f C   ", tc_disp);
-        snprintf(line2, sizeof(line2), "ADC:%4u  %.2fV", adc, v_filt);
-        lcd_put_cur(0,0); lcd_send_string(line1);
-        lcd_put_cur(1,0); lcd_send_string(line2);
-      }
-    }
-  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // TAREA 1: Disparar la lectura (Trigger)
+    if (flag_100ms) {
+      flag_100ms = 0;
+      // En lugar de leer aquí bloqueando, le decimos al DMA: "Arranca".
+      // El CPU sigue de largo inmediatamente.
+      HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_SAMPLES);
+    }
+
+    // TAREA 2: Procesar datos cuando estén listos
+    if (adc_conversion_complete) {
+      adc_conversion_complete = false; // Bajamos la bandera
+
+      // 1) Procesar el buffer (Matemática pura, muy rápido)
+      uint16_t adc = process_adc_buffer();
+
+      // 2) Voltaje + EMA (presentación)
+      float v  = adc_to_voltage(adc);
+      const float alpha_V = 0.10f;          
+      v_filt = (1.0f - alpha_V) * v_filt + alpha_V * v;
+
+      // 3) Convertir a °C
+      float tc = ntc_temp_c_from_adc(adc);
+
+      // 4) EMA de temperatura
+      const float alpha_T = 0.10f;          
+      if (isnan(tc_filt)) tc_filt = tc; else tc_filt += alpha_T * (tc - tc_filt);
+
+      // 5) Control ON/OFF con histéresis + seguridad
+      bool sensor_ok = !isnan(tc_filt);
+      bool overtemp  = sensor_ok && (tc_filt > TEMP_MAX);
+      if (!sensor_ok || overtemp) {
+        heater_on = false;                  // seguridad
+      } else {
+        if (!heater_on && (tc_filt <= (TEMP_TARGET - HYST))) heater_on = true;
+        else if (heater_on && (tc_filt >= (TEMP_TARGET + HYST))) heater_on = false;
+      }
+      heater_set(heater_on);
+
+      // 6) Display 
+      uint32_t now = HAL_GetTick();
+      bool debe_refrescar = isnan(tc_disp)
+                         || fabsf(tc_filt - tc_disp) >= 0.10f
+                         || (now - t_last) >= 1000;
+      if (debe_refrescar) {
+        tc_disp = tc_filt; t_last = now;
+        
+        // Línea 1: Temperatura actual y setpoint
+        if (isnan(tc_disp)) 
+          snprintf(line1, sizeof(line1), "T:---C S:%dC", TEMP_TARGET);
+        else                
+          snprintf(line1, sizeof(line1), "T:%.1fC S:%dC", tc_disp, TEMP_TARGET);
+        
+        // Línea 2: ADC y estado del calefactor
+        snprintf(line2, sizeof(line2), "ADC:%4u H:%s", adc, heater_on ? "ON " : "OFF");
+        
+        lcd_put_cur(0,0); lcd_send_string(line1);
+        lcd_put_cur(1,0); lcd_send_string(line2);
+      }
+    }
+  
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -271,11 +305,12 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  if (htim->Instance == TIM3) {        // tick = 1 ms (PSC=7199, ARR=9 con 72 MHz)
-    static uint16_t d10=0, d100=0, d1000=0;
-    if (++d10   >= 10)   { d10=0;   flag_10ms  = 1; }  // 10 ms
-    if (++d100  >= 100)  { d100=0;  flag_100ms = 1; }  // 100 ms
-    if (++d1000 >= 1000) { d1000=0; flag_1s    = 1; }  // 1 s
+  if (htim->Instance == TIM3) {        // tick = 1 ms
+    static uint16_t d100 = 0;
+    if (++d100 >= 100) {  // Cada 100 ms
+      d100 = 0;  
+      flag_100ms = 1;
+    }
   }
 }
 /* USER CODE END 4 */
