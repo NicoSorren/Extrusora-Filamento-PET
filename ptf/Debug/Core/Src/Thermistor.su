@@ -1,0 +1,2 @@
+../Core/Src/Thermistor.c:17:7:Get_Temperature	64	static
+../Core/Src/Thermistor.c:41:10:Read_ADC_Channel	32	static

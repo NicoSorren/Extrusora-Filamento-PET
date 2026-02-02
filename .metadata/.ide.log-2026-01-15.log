@@ -1,0 +1,32 @@
+2026-01-15 00:04:02,054 [INFO] WebApp:194 - Connection lost
+2026-01-15 00:04:02,522 [INFO] WebApp:191 - Connection restablished
+2026-01-15 09:55:24,843 [INFO] WebApp:194 - Connection lost
+2026-01-15 09:55:25,153 [INFO] WebApp:191 - Connection restablished
+2026-01-15 09:55:27,141 [INFO] WebApp:194 - Connection lost
+2026-01-15 09:55:27,295 [INFO] WebApp:191 - Connection restablished
+2026-01-15 14:45:48,619 [INFO] WebApp:194 - Connection lost
+2026-01-15 14:45:49,156 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:23:42,556 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:23:47,848 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:23:52,294 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:23:52,425 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:23:59,269 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:23:59,418 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:24:11,252 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:24:11,390 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:25:14,768 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:25:16,590 [INFO] WebApp:191 - Connection restablished
+2026-01-15 18:25:23,760 [INFO] WebApp:194 - Connection lost
+2026-01-15 18:25:23,882 [INFO] WebApp:191 - Connection restablished
+2026-01-15 20:57:56,642 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,039 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,039 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,040 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,040 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,041 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,041 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,041 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,042 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,042 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,042 [INFO] ADCParametersView:116 -                Rank 1 : false
+2026-01-15 20:57:57,058 [INFO] ADCParametersView:116 -                Rank 1 : false

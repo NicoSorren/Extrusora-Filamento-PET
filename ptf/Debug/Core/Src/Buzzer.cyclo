@@ -1,0 +1,5 @@
+../Core/Src/Buzzer.c:11:6:opening_melody	2
+../Core/Src/Buzzer.c:35:6:start_melody	2
+../Core/Src/Buzzer.c:48:6:settings_melody	1
+../Core/Src/Buzzer.c:55:6:stop_melody	2
+../Core/Src/Buzzer.c:73:6:short_stop_melody	2

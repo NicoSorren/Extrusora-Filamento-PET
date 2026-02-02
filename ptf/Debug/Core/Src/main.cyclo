@@ -1,0 +1,15 @@
+../Core/Src/main.c:103:6:HAL_TIM_IC_CaptureCallback	19
+../Core/Src/main.c:136:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/main.c:153:6:Stepper_SetSpeed	1
+../Core/Src/main.c:164:6:Stepper_SoftStart	2
+../Core/Src/main.c:182:6:Heater_SetPower	3
+../Core/Src/main.c:205:5:main	65
+../Core/Src/main.c:568:6:SystemClock_Config	3
+../Core/Src/main.c:608:13:MX_ADC_Init	3
+../Core/Src/main.c:662:13:MX_SPI1_Init	2
+../Core/Src/main.c:702:13:MX_TIM1_Init	7
+../Core/Src/main.c:777:13:MX_TIM2_Init	3
+../Core/Src/main.c:826:13:MX_TIM3_Init	4
+../Core/Src/main.c:873:13:MX_DMA_Init	1
+../Core/Src/main.c:891:13:MX_GPIO_Init	1
+../Core/Src/main.c:952:6:Error_Handler	1

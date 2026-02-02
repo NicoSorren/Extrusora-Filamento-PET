@@ -3,6 +3,7 @@
 	<item key="hasShownOverlayPopupBefore" value="true"/>
 	<item key="replaceBarOpen" value="false"/>
 	<list key="searchhistory">
+		<item value="kd"/>
 		<item value="max_spee"/>
 		<item value="HAL_TIM_PeriodElapsedCallback"/>
 		<item value="flag_10ms"/>
@@ -17,6 +18,5 @@
 		<item value="htim"/>
 		<item value="static voi"/>
 		<item value="delay"/>
-		<item value="adc_read"/>
 	</list>
 </section>

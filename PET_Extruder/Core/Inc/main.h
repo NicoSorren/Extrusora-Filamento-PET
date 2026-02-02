@@ -59,12 +59,15 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define DIR_Pin GPIO_PIN_1
 #define DIR_GPIO_Port GPIOA
-#define STOP_BTN_Pin GPIO_PIN_3
-#define STOP_BTN_GPIO_Port GPIOA
 #define START_BTN_Pin GPIO_PIN_4
 #define START_BTN_GPIO_Port GPIOA
 #define MOTOR_EN_Pin GPIO_PIN_5
 #define MOTOR_EN_GPIO_Port GPIOA
+#define STOP_BTN_Pin GPIO_PIN_12
+#define STOP_BTN_GPIO_Port GPIOB
+#define DRV_FAULT_Pin GPIO_PIN_11
+#define DRV_FAULT_GPIO_Port GPIOA
+#define DRV_FAULT_EXTI_IRQn EXTI15_10_IRQn
 #define HEATER_EN_Pin GPIO_PIN_5
 #define HEATER_EN_GPIO_Port GPIOB
 

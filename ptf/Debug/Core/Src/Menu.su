@@ -1,0 +1,6 @@
+../Core/Src/Menu.c:13:6:main_menu	24	static
+../Core/Src/Menu.c:46:6:mm_values	112	static
+../Core/Src/Menu.c:65:6:mm_selection_indicator	32	static
+../Core/Src/Menu.c:95:6:settings_menu	24	static
+../Core/Src/Menu.c:125:6:settings_values	80	static
+../Core/Src/Menu.c:153:6:sm_selection_indicator	32	static
