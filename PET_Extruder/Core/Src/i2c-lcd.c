@@ -1,4 +1,3 @@
-
 /** Put this in the src folder **/
 
 #include "i2c-lcd.h"
@@ -83,7 +82,7 @@ void lcd_init (void)
 	lcd_send_cmd (0x0C); //Display on/off control --> D = 1, C and B = 0. (Cursor and blink, last two bits)
 }
 
-void lcd_send_string (char *str)
+void lcd_send_string (const char *str)
 {
 	while (*str) lcd_send_data (*str++);
 }

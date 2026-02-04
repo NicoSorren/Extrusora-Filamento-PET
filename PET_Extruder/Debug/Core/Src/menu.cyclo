@@ -1,0 +1,16 @@
+../Core/Src/menu.c:242:13:action_save_config_flash	1
+../Core/Src/menu.c:256:13:action_reset_stats	1
+../Core/Src/menu.c:264:13:action_apply_motor_config	1
+../Core/Src/menu.c:275:13:action_apply_thermal_config	1
+../Core/Src/menu.c:288:13:action_restore_defaults	1
+../Core/Src/menu.c:302:13:menu_refresh_dynamic_labels	4
+../Core/Src/menu.c:331:16:menu_count_items	2
+../Core/Src/menu.c:341:6:menu_init	1
+../Core/Src/menu.c:360:6:menu_enter	2
+../Core/Src/menu.c:382:6:menu_exit	1
+../Core/Src/menu.c:388:6:menu_handle_encoder	12
+../Core/Src/menu.c:432:6:menu_handle_button_short	10
+../Core/Src/menu.c:491:6:menu_handle_button_long	4
+../Core/Src/menu.c:518:6:menu_update	7
+../Core/Src/menu.c:553:6:menu_render	10
+../Core/Src/menu.c:607:6:menu_is_active	1

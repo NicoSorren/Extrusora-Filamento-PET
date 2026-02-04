@@ -1,0 +1,11 @@
+../Core/Src/encoder.c:24:6:encoder_init	8	static
+../Core/Src/encoder.c:39:9:encoder_get_count	4	static
+../Core/Src/encoder.c:43:6:encoder_reset_count	4	static
+../Core/Src/encoder.c:47:14:encoder_get_direction	4	static
+../Core/Src/encoder.c:52:6:encoder_button_pressed	4	static
+../Core/Src/encoder.c:61:6:encoder_button_long_press	4	static
+../Core/Src/encoder.c:69:10:encoder_get_irq_count_clk	4	static
+../Core/Src/encoder.c:73:10:encoder_get_irq_count_sw	4	static
+../Core/Src/encoder.c:78:6:encoder_irq_handler	16	static
+../Core/Src/encoder.c:105:6:encoder_button_irq_handler	4	static
+../Core/Src/encoder.c:113:6:encoder_update	24	static

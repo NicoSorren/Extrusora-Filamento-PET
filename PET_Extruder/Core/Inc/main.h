@@ -53,7 +53,10 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void save_config_to_flash(void);
+void load_config_from_flash(void);
+void restore_defaults(void);
+void send_config_report(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -63,8 +66,18 @@ void Error_Handler(void);
 #define START_BTN_GPIO_Port GPIOA
 #define MOTOR_EN_Pin GPIO_PIN_5
 #define MOTOR_EN_GPIO_Port GPIOA
+#define HEATER_BTN_Pin GPIO_PIN_11
+#define HEATER_BTN_GPIO_Port GPIOB
 #define STOP_BTN_Pin GPIO_PIN_12
 #define STOP_BTN_GPIO_Port GPIOB
+#define ENC_SW_Pin GPIO_PIN_13
+#define ENC_SW_GPIO_Port GPIOB
+#define ENC_SW_EXTI_IRQn EXTI15_10_IRQn
+#define ENC_CLK_Pin GPIO_PIN_14
+#define ENC_CLK_GPIO_Port GPIOB
+#define ENC_CLK_EXTI_IRQn EXTI15_10_IRQn
+#define ENC_DT_Pin GPIO_PIN_15
+#define ENC_DT_GPIO_Port GPIOB
 #define DRV_FAULT_Pin GPIO_PIN_11
 #define DRV_FAULT_GPIO_Port GPIOA
 #define DRV_FAULT_EXTI_IRQn EXTI15_10_IRQn
@@ -72,7 +85,15 @@ void Error_Handler(void);
 #define HEATER_EN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+// Moved from main.c for visibility in menu.c
+typedef enum {
+  ERROR_NONE = 0,
+  ERROR_NTC_DISCONNECTED,
+  ERROR_OVERTEMP,
+  ERROR_HEATING_TIMEOUT,
+  ERROR_MOTOR_FAULT,
+  ERROR_EMERGENCY_STOP
+} SystemError_t;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

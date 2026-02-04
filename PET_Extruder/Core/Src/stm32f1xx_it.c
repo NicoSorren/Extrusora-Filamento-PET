@@ -22,6 +22,8 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
+#include "encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +53,22 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// ⬅️ AGREGADO: Estructura PID (necesaria para acceder a pid.output)
+typedef struct {
+    float Kp; 
+    float Ki; 
+    float Kd; 
+    float prevError;
+    float integral;
+    float output;
+} PID_Config;
 
+extern volatile bool adc_conversion_complete;
+extern volatile bool flag_100ms;
+extern volatile bool flag_1ms;
+extern uint32_t pwm_window_start;
+extern bool heater_on;
+extern PID_Config pid;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -235,11 +252,30 @@ void DMA1_Channel4_IRQHandler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-
+  static uint8_t tick_counter = 0;
+  
+  flag_1ms = true;
+  
+  tick_counter++;
+  if (tick_counter >= 100) {
+    tick_counter = 0;
+    flag_100ms = true;
+  }
+  
+  uint32_t elapsed = HAL_GetTick() - pwm_window_start;
+  if (elapsed >= 20) {
+    pwm_window_start = HAL_GetTick();
+  }
+  
+  if (heater_on) {
+    HAL_GPIO_WritePin(HEATER_EN_GPIO_Port, HEATER_EN_Pin, (elapsed < ((uint32_t)(pid.output * 0.2f))) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  } else {
+    HAL_GPIO_WritePin(HEATER_EN_GPIO_Port, HEATER_EN_Pin, GPIO_PIN_RESET);
+  }
+  
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-
   /* USER CODE END TIM3_IRQn 1 */
 }
 
@@ -263,14 +299,33 @@ void USART1_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-
+  
+  // ========== ENCODER CLK (PB14) - Detectar Rotación ==========
+  if (__HAL_GPIO_EXTI_GET_IT(ENC_CLK_Pin) != RESET) {
+    encoder_irq_handler();  // Procesar dirección de rotación
+    __HAL_GPIO_EXTI_CLEAR_IT(ENC_CLK_Pin);
+  }
+  
+  // ========== ENCODER SW (PB13) - Detectar Botón ==========
+  if (__HAL_GPIO_EXTI_GET_IT(ENC_SW_Pin) != RESET) {
+    encoder_button_irq_handler();  // Procesar pulsación del botón
+    __HAL_GPIO_EXTI_CLEAR_IT(ENC_SW_Pin);
+  }
+  
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(DRV_FAULT_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ENC_SW_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ENC_CLK_Pin);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
-
+// ========== CALLBACK DEL ADC ==========
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+  if (hadc->Instance == ADC1) {
+    adc_conversion_complete = true;
+  }
+}
 /* USER CODE END 1 */

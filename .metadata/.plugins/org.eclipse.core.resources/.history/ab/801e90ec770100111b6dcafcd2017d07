@@ -1,0 +1,915 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : PET Extruder - Thermal + Stepper Control
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "adc.h"
+#include "dma.h"
+#include "i2c.h"
+#include "iwdg.h"
+#include "tim.h"
+#include "usart.h"
+#include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "i2c-lcd.h"
+#include "encoder.h"
+#include "menu.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+typedef enum {
+  ERROR_NONE = 0,
+  ERROR_NTC_DISCONNECTED,
+  ERROR_OVERTEMP,
+  ERROR_HEATING_TIMEOUT,
+  ERROR_MOTOR_FAULT,
+  ERROR_EMERGENCY_STOP
+} SystemError_t;
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define VREF            3.3f    
+#define ADCMAX          4095.0f
+
+#define R_SERIES        1000.0f    
+#define R_NTC_25C       100500.0f  
+
+#define BETA_LOW        3950.0f    
+#define BETA_HIGH       4420.0f
+#define R_CROSSOVER     1500.0f    
+#define T_25C_K         298.15f
+
+//#define T_SET_C         250.0f   
+
+#define T_HYST_C        2.0f
+#define T_MAX_C         275.0f   
+
+#define ADC_BUF_SIZE    64
+#define ALPHA_TEMP      0.1f
+
+#define FREQ_MIN_HZ     50      
+#define ACCEL_STEPS     2000    
+#define DECEL_STEPS     2000    
+
+#define TEMP_SAFE_EXTRUSION  100.0f 
+
+#define MOTOR_STEPS_PER_REV  200.0f
+#define MICROSTEPPING        32.0f
+#define GEAR_RATIO           60.0f    
+#define ROLLER_DIAMETER_MM   70.8f    
+#define PI                   3.14159265f
+#define E_STEPS_PER_MM       ((MOTOR_STEPS_PER_REV * MICROSTEPPING * GEAR_RATIO) / (PI * ROLLER_DIAMETER_MM))
+
+#define HEATING_TIMEOUT_MS      300000UL
+#define TEMP_STARTUP_THRESHOLD  100.0f
+#define ADC_DISCONNECTED_LOW    50
+#define ADC_DISCONNECTED_HIGH   4045
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+static inline float adc_to_voltage(uint16_t adc) { 
+  return (adc * VREF) / ADCMAX; 
+}
+
+static inline float ntc_temp_c_from_adc(uint16_t adc) {
+  float v_ntc = adc_to_voltage(adc);
+  
+  if (v_ntc < 0.05f || v_ntc > (VREF - 0.05f)) return NAN; 
+
+  float r_ntc = R_SERIES / ((VREF / v_ntc) - 1.0f);
+  if (r_ntc <= 0.0f) return NAN; 
+
+  float current_beta = (r_ntc > R_CROSSOVER) ? BETA_LOW : BETA_HIGH;
+
+  float inv_t = (1.0f / T_25C_K) + (1.0f / current_beta) * logf(r_ntc / R_NTC_25C);
+  return (1.0f / inv_t) - 273.15f;
+}
+
+static inline void heater_set(bool on) {
+  HAL_GPIO_WritePin(HEATER_EN_GPIO_Port, HEATER_EN_Pin, on ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+static inline void motor_enable(bool en) {
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, en ? GPIO_PIN_RESET : GPIO_PIN_SET);
+}
+
+static void set_motor_speed(uint16_t freq_hz) {
+  if (freq_hz < FREQ_MIN_HZ) freq_hz = FREQ_MIN_HZ;
+  if (freq_hz > 20000) freq_hz = 20000;
+  
+  uint32_t arr = (1000000UL / freq_hz) - 1;
+  __HAL_TIM_SET_AUTORELOAD(&htim1, arr);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, arr / 2); 
+}
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+uint32_t error_count = 0;
+float target_temp = 250.0f;
+static uint16_t adc_buffer[ADC_BUF_SIZE];
+volatile bool adc_conversion_complete = false;  
+volatile bool flag_100ms = false;              
+volatile bool flag_1ms = false;                
+
+static float tc_filt = NAN;
+bool heater_on = false;                        
+
+static MotorState motor_state = MOTOR_IDLE;      
+static ThermalState thermal_state = THERMAL_IDLE;
+static uint32_t step_count = 0;
+static uint16_t current_freq = FREQ_MIN_HZ;
+static bool direction_cw = true;
+static bool motor_running = false;
+
+static char tx_buffer[64]; 
+
+PID_Config pid = {  
+    .Kp = 4.0f,
+    .Ki = 0.15f,
+    .Kd = 10.0f,
+    .prevError = 0.0f,
+    .integral = 0.0f,
+    .output = 0.0f
+};
+
+uint32_t pwm_window_start = 0;  
+float target_speed_mm_s = 3.0f;
+
+uint8_t rx_byte;
+char rx_buffer[10];
+uint8_t rx_index = 0;
+
+static SystemError_t system_error = ERROR_NONE;
+static uint32_t heating_start_time = 0;
+static bool heating_phase_active = false;
+
+// VARIABLES DE GESTIÓN DE BOTONES FÍSICOS
+// Start (Motor)
+static uint32_t btn_start_timer = 0;
+// Stop (Motor)
+static uint32_t btn_stop_timer = 0;
+
+// Nuevo Botón Heater (Toggle PB11)
+static bool last_heater_btn_state = true; // Asumimos Pull-up (1 = suelto, 0 = apretado)
+static uint32_t heater_btn_timer = 0;
+
+// Flags de eventos (Comandos que se pasan al main loop)
+bool cmd_motor_start = false;
+bool cmd_motor_stop = false;
+bool cmd_heater_start = false;
+bool cmd_heater_stop = false;
+
+// ⬇️ NUEVAS BANDERAS PARA UART (Mantén las de heater y agrega las de motor) ⬇️
+volatile bool uart_cmd_heater_start = false;
+volatile bool uart_cmd_heater_stop = false;
+volatile bool uart_cmd_motor_start = false; // <--- AGREGAR
+volatile bool uart_cmd_motor_stop = false;  // <--- AGREGAR
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
+void handle_physical_buttons(void);
+static void process_adc_buffer(void);
+static void motor_state_machine(void);
+static void update_lcd(void);
+float PID_Compute(PID_Config *pid, float setpoint, float measured_value, float dt_seconds);
+uint32_t speed_mm_s_to_hz(float speed_mm_s); 
+static void check_safety_conditions(void);
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+static float s_curve_profile(float progress) {
+    if (progress <= 0.0f) return 0.0f;
+    if (progress >= 1.0f) return 1.0f;
+    return (1.0f - cosf(PI * progress)) / 2.0f;
+}
+
+uint32_t speed_mm_s_to_hz(float speed_mm_s) {
+    if (speed_mm_s <= 0.0f) return 0;
+    float hz = speed_mm_s * E_STEPS_PER_MM;
+    if (hz > 20000.0f) hz = 20000.0f;
+    return (uint32_t)hz;
+}
+
+static void check_safety_conditions(void) {
+    uint32_t sum = 0;
+    for (int i = 0; i < ADC_BUF_SIZE; i++) {
+        sum += adc_buffer[i];
+    }
+    uint16_t adc_avg = sum / ADC_BUF_SIZE;
+    
+    // Check NTC desconectado
+    if (adc_avg < ADC_DISCONNECTED_LOW || adc_avg > ADC_DISCONNECTED_HIGH) {
+        system_error = ERROR_NTC_DISCONNECTED;
+        pid.output = 0.0f;
+        heater_set(false);
+        motor_state = MOTOR_IDLE; // ⬅️ CORREGIDO (era STATE_IDLE)
+        motor_enable(false);
+        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+        
+        lcd_clear();
+        lcd_put_cur(0, 0);
+        lcd_send_string("ERROR: NTC DISC");
+        lcd_put_cur(1, 0);
+        lcd_send_string("Check Wiring!");
+        return;
+    }
+    
+    // Check Sobretemperatura
+    if (!isnan(tc_filt) && tc_filt > T_MAX_C) {
+        system_error = ERROR_OVERTEMP;
+        pid.output = 0.0f;
+        heater_set(false);
+        motor_state = MOTOR_IDLE; // ⬅️ CORREGIDO
+        motor_enable(false);
+        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+        
+        lcd_clear();
+        lcd_put_cur(0, 0);
+        lcd_send_string("OVERTEMP!");
+        lcd_put_cur(1, 0);
+        char temp_str[17];
+        snprintf(temp_str, sizeof(temp_str), "T: %.1f C", tc_filt);
+        lcd_send_string(temp_str);
+        return;
+    }
+    
+    // Check Timeout Calentamiento
+    if (heating_phase_active) {
+        if (tc_filt >= TEMP_STARTUP_THRESHOLD) {
+            heating_phase_active = false;
+        } else if ((HAL_GetTick() - heating_start_time) > HEATING_TIMEOUT_MS) {
+            system_error = ERROR_HEATING_TIMEOUT;
+            pid.output = 0.0f;
+            heater_set(false);
+            
+            lcd_clear();
+            lcd_put_cur(0, 0);
+            lcd_send_string("HEATING TIMEOUT");
+            lcd_put_cur(1, 0);
+            lcd_send_string("Check Heater!");
+            return;
+        }
+    }
+    
+    if (system_error != ERROR_NONE) {
+        system_error = ERROR_NONE;
+    }
+}
+
+static void process_adc_buffer(void) {
+    uint32_t sum = 0;
+    for (int i = 0; i < ADC_BUF_SIZE; i++) {
+        sum += adc_buffer[i];
+    }
+    uint16_t adc_avg = sum / ADC_BUF_SIZE;
+    
+    float tc_raw = ntc_temp_c_from_adc(adc_avg);
+    
+    if (isnan(tc_raw)) {
+        tc_filt = NAN;
+    } else {
+        if (isnan(tc_filt)) {
+            tc_filt = tc_raw;
+        } else {
+            tc_filt = ALPHA_TEMP * tc_raw + (1.0f - ALPHA_TEMP) * tc_filt;
+        }
+    }
+}
+
+static void motor_state_machine(void) {
+  // ELIMINADAS lecturas directas de pines (ahora usamos cmd_motor_start/stop)
+  
+  bool sensor_ok = !isnan(tc_filt);
+  bool temp_safe = sensor_ok && (tc_filt >= TEMP_SAFE_EXTRUSION);
+  
+  uint32_t target_hz = speed_mm_s_to_hz(target_speed_mm_s);
+  if (target_hz < FREQ_MIN_HZ) target_hz = FREQ_MIN_HZ;
+
+  switch (motor_state) {
+    
+    case MOTOR_IDLE:
+      motor_enable(false);
+      motor_running = false;
+      current_freq = 0;
+      
+      // CAMBIO AQUÍ: Chequear flag física O flag UART
+      if ((cmd_motor_start || uart_cmd_motor_start) && temp_safe) {
+        motor_state = MOTOR_ACCEL;
+        motor_running = true;
+        motor_enable(true);
+        current_freq = FREQ_MIN_HZ;
+        set_motor_speed(current_freq);
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+        step_count = 0;
+        uart_cmd_motor_start = false; // Importante: Limpiar flag UART
+      } 
+      // Si intentan arrancar en frío, mostrar aviso
+      else if ((cmd_motor_start || uart_cmd_motor_start) && !temp_safe) {
+          lcd_put_cur(1, 0);
+          lcd_send_string("Cold Protect!   ");
+          uart_cmd_motor_start = false; // Limpiar flag UART
+          HAL_Delay(1000); 
+      }
+      break;
+      
+    case MOTOR_ACCEL:
+      motor_enable(true);
+      motor_running = true;
+      
+      if (step_count < ACCEL_STEPS) {
+        float progress = (float)step_count / (float)ACCEL_STEPS;
+        float curve_factor = s_curve_profile(progress);
+        current_freq = FREQ_MIN_HZ + (uint32_t)((target_hz - FREQ_MIN_HZ) * curve_factor);
+        set_motor_speed(current_freq);
+        step_count++;
+      } else {
+        motor_state = MOTOR_RUN;
+        current_freq = target_hz;
+        set_motor_speed(current_freq);
+      }
+      
+      // CAMBIO AQUÍ: Chequear Stop Físico O UART
+      if (cmd_motor_stop || uart_cmd_motor_stop || !temp_safe) {
+        motor_state = MOTOR_DECEL;
+        step_count = 0;
+        uart_cmd_motor_stop = false; // Limpiar flag UART
+      }
+      break;
+      
+    case MOTOR_RUN:
+      motor_enable(true);
+      motor_running = true;
+      
+      int32_t freq_error = (int32_t)target_hz - (int32_t)current_freq;
+      const uint32_t RAMP_STEP_HZ = 5;
+      
+      if (abs(freq_error) > RAMP_STEP_HZ) {
+        if (freq_error > 0) current_freq += RAMP_STEP_HZ;
+        else current_freq -= RAMP_STEP_HZ;
+        set_motor_speed(current_freq);
+      } else if (abs(freq_error) > 0) {
+        current_freq = target_hz;
+        set_motor_speed(current_freq);
+      }
+      
+      // CAMBIO AQUÍ: Chequear Stop Físico O UART
+      if (cmd_motor_stop || uart_cmd_motor_stop || !temp_safe) {
+        motor_state = MOTOR_DECEL;
+        step_count = 0;
+        uart_cmd_motor_stop = false; // Limpiar flag UART
+      }
+      break;
+      
+    case MOTOR_DECEL:
+      if (step_count < DECEL_STEPS) {
+        float progress = (float)step_count / (float)DECEL_STEPS;
+        float curve_factor = 1.0f - s_curve_profile(progress);
+        current_freq = FREQ_MIN_HZ + (uint32_t)((target_hz - FREQ_MIN_HZ) * curve_factor);
+        set_motor_speed(current_freq);
+        step_count++;
+      } else {
+        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+        motor_state = MOTOR_IDLE;
+        motor_enable(false);
+        motor_running = false;
+        current_freq = 0;
+      }
+      break;
+      
+    default:
+        motor_enable(false);
+        break;
+  }
+}
+
+static void update_lcd(void) {
+  char lcd_line1[17];
+  char lcd_line2[17];
+
+  // 1. Manejo de Errores (Máx 16 chars)
+  if (system_error != ERROR_NONE) {
+      if (system_error == ERROR_NTC_DISCONNECTED) 
+          snprintf(lcd_line1, sizeof(lcd_line1), "ERROR: NTC DISC ");
+      else if (system_error == ERROR_OVERTEMP) 
+          snprintf(lcd_line1, sizeof(lcd_line1), "ERROR: OVERTEMP ");
+      else 
+          snprintf(lcd_line1, sizeof(lcd_line1), "ERROR: CODE %-4d", system_error);
+  } 
+  // 2. Error de Lectura
+  else if (isnan(tc_filt)) {
+      snprintf(lcd_line1, sizeof(lcd_line1), "T:Err / %.0fC     ", target_temp);
+  } 
+  // 3. Funcionamiento Normal
+  else {
+      char status_char;
+      switch (thermal_state) {
+          case THERMAL_IDLE:    status_char = '-'; break;
+          case THERMAL_HEATING: status_char = '^'; break;
+          case THERMAL_READY:   status_char = '*'; break;
+          default:              status_char = '?'; break;
+      }
+      
+      char buffer_temp[17];
+      snprintf(buffer_temp, sizeof(buffer_temp), "T:%.1f/%.0f %c %c", 
+               tc_filt, target_temp, status_char, heater_on ? 'H' : ' ');
+      snprintf(lcd_line1, sizeof(lcd_line1), "%-16.16s", buffer_temp);
+  }
+  
+  // Línea 2 (Motor y Estado)
+  if (motor_state == MOTOR_IDLE) {
+      if (thermal_state == THERMAL_IDLE) {
+          // Solo pedimos START si está todo apagado
+          snprintf(lcd_line2, sizeof(lcd_line2), "Press START"); 
+      } 
+      else if (thermal_state == THERMAL_HEATING) {
+          // Si está calentando, mostramos progreso
+          snprintf(lcd_line2, sizeof(lcd_line2), "Heating... %3d%% ", (int)pid.output);
+      }
+      else if (thermal_state == THERMAL_READY) {
+          snprintf(lcd_line2, sizeof(lcd_line2), "Ready - 0 Hz    ");
+      }
+      else {
+          snprintf(lcd_line2, sizeof(lcd_line2), "Wait...         ");
+      }
+  } else {
+      char buff_speed[32];
+      snprintf(buff_speed, sizeof(buff_speed), "%.1fmm/s %uHz", 
+               target_speed_mm_s, current_freq);
+      snprintf(lcd_line2, sizeof(lcd_line2), "%-16.16s", buff_speed);
+  }
+  
+  lcd_put_cur(0, 0);
+  lcd_send_string(lcd_line1);
+  lcd_put_cur(1, 0); 
+  lcd_send_string(lcd_line2);
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_ADC1_Init();
+  MX_TIM2_Init();
+  MX_I2C1_Init();
+  MX_TIM3_Init();
+  MX_USART1_UART_Init();
+  MX_TIM1_Init();
+  MX_IWDG_Init();
+  /* USER CODE BEGIN 2 */
+  
+lcd_init();
+lcd_clear();
+encoder_init();
+menu_init();  // ⬅️ AGREGAR ESTA LÍNEA
+
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUF_SIZE);
+  HAL_TIM_Base_Start_IT(&htim3);
+  
+  motor_enable(false); 
+  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, direction_cw ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  heater_set(false);
+  
+  HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+  
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    HAL_IWDG_Refresh(&hiwdg);
+    
+    encoder_update();
+    
+    // 1. INPUTS: Leer botones SIEMPRE
+    handle_physical_buttons(); 
+    
+    // 2. MOTOR: Ejecutar solo si pasó 1 milisegundo (Control de Rampa)
+    if (flag_1ms) {
+        motor_state_machine(); 
+        flag_1ms = false;
+    }
+    
+    if (menu_is_active()) {
+      menu_update();
+      menu_render();
+      if (encoder_button_pressed()) menu_handle_button_short();
+      if (encoder_button_long_press()) menu_handle_button_long();
+      
+    } else {
+      
+      if (encoder_button_long_press()) {
+        menu_enter();
+        continue;
+      }
+      
+      // Iniciar conversión ADC cada 100ms
+      if (flag_100ms) {
+        flag_100ms = false;
+        HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUF_SIZE);
+      }
+      
+      // 3. SENSORES Y SEGURIDAD (Solo si hay nuevos datos)
+      if (adc_conversion_complete) {
+        process_adc_buffer();
+        check_safety_conditions(); // Puede cambiar thermal_state a ERROR
+      }
+        
+      // 4. LÓGICA TÉRMICA (Ejecutar SIEMPRE para detectar botones)
+      switch (thermal_state) {
+          
+          case THERMAL_IDLE:
+            pid.output = 0.0f;
+            heater_on = false;
+            
+            // ⬇️ MODIFICADO: Aceptar botón Físico (cmd) O comando UART (uart_cmd)
+            if ((cmd_heater_start || uart_cmd_heater_start) && !isnan(tc_filt)) {
+                thermal_state = THERMAL_HEATING;
+                heating_phase_active = true;
+                heating_start_time = HAL_GetTick();
+                
+                // Limpiamos bandera UART
+                uart_cmd_heater_start = false; 
+                
+                if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Start\r\n", 12, 100);
+            }
+            break;
+            
+          case THERMAL_HEATING:
+            // Calcular PID solo si hay datos nuevos (cada 100ms)
+            if (adc_conversion_complete) {
+                pid.output = PID_Compute(&pid, target_temp, tc_filt, 0.1f);
+                heater_on = (pid.output > 1.0f);
+                
+                // Chequear si llegamos al target
+                if (!isnan(tc_filt) && fabs(tc_filt - target_temp) < 5.0f) {
+                  thermal_state = THERMAL_READY;
+                  heating_phase_active = false;
+                  if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Ready\r\n", 12, 100);
+                }
+            }
+            
+            // ⬇️ MODIFICADO: Apagado manual Físico o UART
+            if (cmd_heater_stop || uart_cmd_heater_stop) {
+                thermal_state = THERMAL_IDLE;
+                uart_cmd_heater_stop = false; // Limpiar bandera UART
+                if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Stop\r\n", 12, 100);
+            }
+            
+            if (system_error != ERROR_NONE) thermal_state = THERMAL_ERROR;
+            break;
+            
+          case THERMAL_READY:
+             if (adc_conversion_complete) {
+                pid.output = PID_Compute(&pid, target_temp, tc_filt, 0.1f);
+                heater_on = (pid.output > 1.0f);
+             }
+            
+            // ⬇️ MODIFICADO: Apagado manual Físico o UART
+            if (cmd_heater_stop || uart_cmd_heater_stop) {
+                thermal_state = THERMAL_IDLE;
+                pid.output = 0.0f;
+                heater_on = false;
+                uart_cmd_heater_stop = false; // Limpiar bandera UART
+                if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Stop\r\n", 12, 100);
+            }
+            
+            if (system_error != ERROR_NONE) thermal_state = THERMAL_ERROR;
+            break;
+            
+          case THERMAL_ERROR:
+            pid.output = 0.0f;
+            heater_on = false;
+            
+            if (cmd_motor_stop || cmd_heater_stop) {
+              system_error = ERROR_NONE;
+              thermal_state = THERMAL_IDLE;
+              lcd_clear();
+            }
+            break;
+      }
+      
+      // 5. SALIDA FÍSICA (CRÍTICO: APLICAR EL VALOR AL PIN)
+      heater_set(heater_on);
+      
+      // CAMBIO AQUI: Quitamos la condición restrictiva huart1.gState.
+      // Solo chequeamos si hay nuevos datos (adc_conversion_complete)
+      if (adc_conversion_complete) {
+          float error = target_temp - tc_filt;
+          
+          int pwm_out = (thermal_state == THERMAL_IDLE) ? 0 : (int)pid.output;
+          float actual_speed_mm_s = (float)current_freq / E_STEPS_PER_MM;
+          
+          // FIX: Manual formatting for floats (avoids linker flags issues)
+          // Temp Actual
+          int t_curr_int = (int)tc_filt;
+          int t_curr_dec = (int)(fabs(tc_filt - t_curr_int) * 100);
+          // Target
+          int t_targ_int = (int)target_temp;
+          int t_targ_dec = (int)(fabs(target_temp - t_targ_int) * 100);
+          // Speed
+          int spd_int = (int)actual_speed_mm_s;
+          int spd_dec = (int)(fabs(actual_speed_mm_s - spd_int) * 100);
+          // Error
+          int err_int = (int)error;
+          int err_dec = (int)(fabs(error - err_int) * 100);
+
+          int len = sprintf(tx_buffer, "%lu,%d.%02d,%d.%02d,%d,%d.%02d,%d.%02d\r\n", 
+                 HAL_GetTick(), 
+                 t_curr_int, t_curr_dec,
+                 t_targ_int, t_targ_dec,
+                 pwm_out, 
+                 spd_int, spd_dec,
+                 err_int, err_dec);
+                 
+          // Timeout de 50ms suficiente para enviar sin bloquear todo si está ocupado
+          HAL_UART_Transmit(&huart1, (uint8_t*)tx_buffer, len, 50);
+      }
+      
+      // Limpiar bandera de ADC al FINAL
+      if (adc_conversion_complete) {
+          adc_conversion_complete = false;
+          update_lcd();
+      }
+    }
+    
+  }
+  
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+} // <--- Esta llave cierra el int main(void). ES LA ÚNICA QUE DEBE HABER AQUÍ.
+
+// BORRA TODO LO QUE HAYA ABAJO DE ESTO ANTES DEL 'USER CODE END 3'
+// SI VES OTRAS LLAVES '}' AQUÍ, BÓRRALAS.
+
+  /* USER CODE END 3 */
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/* USER CODE BEGIN 4 */
+
+// ========== CALLBACK DE RECEPCIÓN UART (INTERRUPCIÓN) ==========
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  if (huart->Instance == USART1) {
+    if (rx_byte == '\n' || rx_byte == '\r') {
+      rx_buffer[rx_index] = '\0'; 
+      if (rx_index > 0) {
+        char cmd = rx_buffer[0];
+        
+        // --- T: SET TEMPERATURE ---
+        if (cmd == 't' || cmd == 'T') {
+          float new_temp = atof((char*)&rx_buffer[1]);
+          if (new_temp >= 0.0f && new_temp <= T_MAX_C) {
+             target_temp = new_temp;
+             HAL_UART_Transmit(&huart1, (uint8_t*)"OK: Temp Updated\r\n", 18, 100);
+          }
+        }
+        // --- H: HEATER ON/OFF ---
+        else if (cmd == 'h' || cmd == 'H') {
+           if (rx_buffer[1] == '1') {
+               uart_cmd_heater_start = true; 
+               HAL_UART_Transmit(&huart1, (uint8_t*)"OK: Heater ON\r\n", 15, 100);
+           } else {
+               uart_cmd_heater_stop = true; 
+               HAL_UART_Transmit(&huart1, (uint8_t*)"OK: Heater OFF\r\n", 16, 100);
+           }
+        }
+        // --- V: VELOCIDAD ---
+        else if (cmd == 'v' || cmd == 'V') {
+          float new_speed = atof((char*)&rx_buffer[1]);
+          if (new_speed >= 0.1f && new_speed <= 15.0f) { 
+            target_speed_mm_s = new_speed;
+            char ack[32]; sprintf(ack, "OK: Speed=%.1f\r\n", target_speed_mm_s);
+            HAL_UART_Transmit(&huart1, (uint8_t*)ack, strlen(ack), 100);
+          }
+        }
+        // --- S/R: STOP/RUN ---
+        else if (cmd == 's' || cmd == 'S') {
+            uart_cmd_motor_stop = true; // <--- USAR NUEVA VARIABLE
+            HAL_UART_Transmit(&huart1, (uint8_t*)"OK: Motor Stop\r\n", 16, 100);
+        }
+        else if (cmd == 'r' || cmd == 'R') {
+            uart_cmd_motor_start = true; // <--- USAR NUEVA VARIABLE
+            HAL_UART_Transmit(&huart1, (uint8_t*)"OK: Motor Start\r\n", 17, 100);
+        }
+        else {
+             HAL_UART_Transmit(&huart1, (uint8_t*)"ERR: Unknown\r\n", 14, 100);
+        }
+      }
+      rx_index = 0; 
+    } else {
+      if (rx_index < (sizeof(rx_buffer) - 1)) rx_buffer[rx_index++] = rx_byte;
+      else rx_index = 0; 
+    }
+    HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+  }
+}
+
+void handle_physical_buttons(void) {
+    cmd_motor_start = false;
+    cmd_motor_stop = false;
+    cmd_heater_start = false;
+    cmd_heater_stop = false;
+    uint32_t now = HAL_GetTick();
+
+    // Start
+    if (HAL_GPIO_ReadPin(START_BTN_GPIO_Port, START_BTN_Pin) == GPIO_PIN_RESET) {
+        if ((now - btn_start_timer) > 200) { 
+            cmd_motor_start = true; btn_start_timer = now;
+        }
+    }
+    // Stop
+    if (HAL_GPIO_ReadPin(STOP_BTN_GPIO_Port, STOP_BTN_Pin) == GPIO_PIN_RESET) {
+        if ((now - btn_stop_timer) > 200) {
+            cmd_motor_stop = true; btn_stop_timer = now;
+        }
+    }
+    // Toggle Heater
+    bool is_heater_pressed = (HAL_GPIO_ReadPin(HEATER_BTN_GPIO_Port, HEATER_BTN_Pin) == GPIO_PIN_RESET);
+    if (is_heater_pressed && last_heater_btn_state == true) { 
+        if ((now - heater_btn_timer) > 300) {
+            if (thermal_state == THERMAL_IDLE || thermal_state == THERMAL_ERROR) {
+                cmd_heater_start = true;
+                lcd_put_cur(1, 0); lcd_send_string("Heater ON...    "); HAL_Delay(500); 
+            } else {
+                cmd_heater_stop = true; 
+                lcd_put_cur(1, 0); lcd_send_string("Heater OFF...   "); HAL_Delay(500);
+            }
+            heater_btn_timer = now;
+        }
+        last_heater_btn_state = false; 
+    } else if (!is_heater_pressed) {
+        last_heater_btn_state = true; 
+    }
+}
+
+float PID_Compute(PID_Config *pid, float setpoint, float measured_value, float dt_seconds) {
+    float error = setpoint - measured_value;
+    float P = pid->Kp * error;
+    if (fabs(error) < 15.0f) pid->integral += error * dt_seconds; else pid->integral = 0.0f;
+    float I_term = pid->Ki * pid->integral; 
+    if (I_term > 100.0f) { I_term = 100.0f; pid->integral = 100.0f / pid->Ki; }
+    else if (I_term < -20.0f) { I_term = -20.0f; pid->integral = -20.0f / pid->Ki; }
+    float derivative = (error - pid->prevError) / dt_seconds;
+    float D = pid->Kd * derivative;
+    pid->prevError = error;
+    float output = P + I_term + D;
+    if (output > 100.0f) output = 100.0f;
+    if (output < 0.0f) output = 0.0f; 
+    return output;
+}
+
+// ============================================
+// TIMER CALLBACK: EL CORAZÓN DEL SISTEMA
+// Maneja Rampa Motor (1ms) y Datos/Gráficos (100ms)
+// ============================================
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM3) {
+    static uint32_t counter_100ms = 0;
+    
+    // Bandera para Rampa de Motor (1ms)
+    flag_1ms = true; 
+    
+    counter_100ms++;
+    if (counter_100ms >= 100) {
+      flag_100ms = true;
+      
+      // TRUCO MAESTRO:
+      // Activamos 'adc_conversion_complete' aquí para evitar conflictos de interrupciones.
+      // Esto engaña al main loop para que procese los datos y los envíe al Dashboard.
+      adc_conversion_complete = true; 
+      
+      counter_100ms = 0;
+    }
+  }
+}
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+      // El microcontrolador se queda aquí si algo falla gravemente
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+#ifdef USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
