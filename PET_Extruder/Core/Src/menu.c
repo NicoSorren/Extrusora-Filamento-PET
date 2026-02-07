@@ -415,10 +415,11 @@ void menu_handle_encoder(int32_t delta) {
       
     } else if (item->type == MENU_ITEM_VALUE_FLOAT) {
       float *val = (float *)item->data.value.value_ptr;
-      float new_val = *val + (delta * item->data.value.step * 0.1f);
+      // Incremento de 0.01 tal como solicitado
+      float new_val = *val + (delta * item->data.value.step * 0.01f);
       
-      if (new_val < item->data.value.min * 0.1f) new_val = item->data.value.min * 0.1f;
-      if (new_val > item->data.value.max * 0.1f) new_val = item->data.value.max * 0.1f;
+      if (new_val < item->data.value.min * 0.01f) new_val = item->data.value.min * 0.01f;
+      if (new_val > item->data.value.max * 0.01f) new_val = item->data.value.max * 0.01f;
       
       *val = new_val;
       

@@ -62,10 +62,18 @@ void send_config_report(void);
 /* Private defines -----------------------------------------------------------*/
 #define DIR_Pin GPIO_PIN_1
 #define DIR_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_2
+#define BUZZER_GPIO_Port GPIOA
+#define RGB_B_Pin GPIO_PIN_3
+#define RGB_B_GPIO_Port GPIOA
 #define START_BTN_Pin GPIO_PIN_4
 #define START_BTN_GPIO_Port GPIOA
 #define MOTOR_EN_Pin GPIO_PIN_5
 #define MOTOR_EN_GPIO_Port GPIOA
+#define RGB_R_Pin GPIO_PIN_0
+#define RGB_R_GPIO_Port GPIOB
+#define RGB_G_Pin GPIO_PIN_1
+#define RGB_G_GPIO_Port GPIOB
 #define HEATER_BTN_Pin GPIO_PIN_11
 #define HEATER_BTN_GPIO_Port GPIOB
 #define STOP_BTN_Pin GPIO_PIN_12
@@ -85,6 +93,7 @@ void send_config_report(void);
 #define HEATER_EN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+
 // Moved from main.c for visibility in menu.c
 typedef enum {
   ERROR_NONE = 0,

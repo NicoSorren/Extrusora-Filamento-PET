@@ -1,0 +1,41 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Introducción}{3}{}%
+\contentsline {subsection}{\numberline {1.1}Motivación y Contexto}{3}{}%
+\contentsline {subsection}{\numberline {1.2}Fundamentos y Principios de Funcionamiento}{3}{}%
+\contentsline {section}{\numberline {2}Esquema Tecnológico}{3}{}%
+\contentsline {section}{\numberline {3}Detalle de Módulos}{4}{}%
+\contentsline {subsection}{\numberline {3.1}Microcontrolador: STM32F103 (Blue Pill)}{4}{}%
+\contentsline {subsection}{\numberline {3.2}Sistema de Alimentación y Regulación}{5}{}%
+\contentsline {subsection}{\numberline {3.3}Control de Tracción: Motor Paso a Paso y Driver}{5}{}%
+\contentsline {subsection}{\numberline {3.4}Control de Temperatura: Sensado y Actuación Térmica}{6}{}%
+\contentsline {subsubsection}{\numberline {3.4.1}Sensor de Temperatura (NTC 100k$\Omega $)}{6}{}%
+\contentsline {subsubsection}{\numberline {3.4.2}Actuador Térmico (Cartucho Calefactor)}{6}{}%
+\contentsline {subsection}{\numberline {3.5}Interfaz de Usuario Local}{7}{}%
+\contentsline {subsubsection}{\numberline {3.5.1}LCD 1602 I2C}{7}{}%
+\contentsline {subsubsection}{\numberline {3.5.2}Encoder Rotativo con Pulsador}{8}{}%
+\contentsline {subsection}{\numberline {3.6}Sistema de Señalización}{8}{}%
+\contentsline {subsubsection}{\numberline {3.6.1}LED RGB de Estado}{8}{}%
+\contentsline {subsubsection}{\numberline {3.6.2}Buzzer Activo}{9}{}%
+\contentsline {subsection}{\numberline {3.7}Botones de Control Físico}{9}{}%
+\contentsline {subsection}{\numberline {3.8}Comunicación Serial UART}{9}{}%
+\contentsline {section}{\numberline {4}Funcionamiento General}{10}{}%
+\contentsline {subsection}{\numberline {4.1}Arquitectura del Firmware}{10}{}%
+\contentsline {subsubsection}{\numberline {4.1.1}Timers del Sistema}{10}{}%
+\contentsline {subsubsection}{\numberline {4.1.2}Adquisición de Temperatura (ADC + DMA)}{11}{}%
+\contentsline {subsubsection}{\numberline {4.1.3}Bucle Principal (Superloop)}{11}{}%
+\contentsline {subsection}{\numberline {4.2}Máquina de Estados Térmica}{11}{}%
+\contentsline {subsection}{\numberline {4.3}Máquina de Estados del Motor}{12}{}%
+\contentsline {subsection}{\numberline {4.4}Sistema de Seguridad Multicapa}{13}{}%
+\contentsline {subsubsection}{\numberline {4.4.1}Detección de Errores Críticos}{13}{}%
+\contentsline {subsubsection}{\numberline {4.4.2}Enclavamiento de Seguridad (Safety Latch)}{13}{}%
+\contentsline {subsubsection}{\numberline {4.4.3}Watchdog Independiente (IWDG)}{13}{}%
+\contentsline {subsection}{\numberline {4.5}Interacción de Módulos y Flujo de Ejecución}{13}{}%
+\contentsline {subsection}{\numberline {4.6}Diagrama de Flujo Operativo}{14}{}%
+\contentsline {section}{\numberline {5}Programación}{15}{}%
+\contentsline {subsection}{\numberline {5.1}Configuración de Periféricos}{15}{}%
+\contentsline {subsection}{\numberline {5.2}Descripción del Firmware}{15}{}%
+\contentsline {section}{\numberline {6}Etapas de Montaje y Ensayos Realizados}{15}{}%
+\contentsline {section}{\numberline {7}Resultados y Especificaciones Finales}{15}{}%
+\contentsline {section}{\numberline {8}Conclusiones}{15}{}%
+\contentsline {section}{\numberline {9}Referencias}{15}{}%
+\contentsline {section}{\numberline {A}Anexos}{15}{}%

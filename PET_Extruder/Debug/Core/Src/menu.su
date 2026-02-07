@@ -9,8 +9,8 @@
 ../Core/Src/menu.c:360:6:menu_enter	8	static
 ../Core/Src/menu.c:382:6:menu_exit	8	static
 ../Core/Src/menu.c:388:6:menu_handle_encoder	56	static
-../Core/Src/menu.c:432:6:menu_handle_button_short	16	static
-../Core/Src/menu.c:491:6:menu_handle_button_long	16	static
-../Core/Src/menu.c:518:6:menu_update	16	static
-../Core/Src/menu.c:553:6:menu_render	104	static
-../Core/Src/menu.c:607:6:menu_is_active	4	static
+../Core/Src/menu.c:433:6:menu_handle_button_short	16	static
+../Core/Src/menu.c:492:6:menu_handle_button_long	16	static
+../Core/Src/menu.c:519:6:menu_update	16	static
+../Core/Src/menu.c:554:6:menu_render	104	static
+../Core/Src/menu.c:608:6:menu_is_active	4	static

@@ -28,7 +28,6 @@
 #include <string.h>
 /* USER CODE END Includes */
 
-/* USER CODE BEGIN (0-804) */
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 // SystemError_t moved to main.h
@@ -50,7 +49,7 @@
 //#define T_SET_C         250.0f   
 
 #define T_HYST_C        2.0f
-#define T_MAX_C         275.0f   
+#define T_MAX_C         270.0f   
 
 #define ADC_BUF_SIZE    64
 #define ALPHA_TEMP      0.1f
@@ -59,7 +58,7 @@
 #define ACCEL_STEPS     2000    
 #define DECEL_STEPS     2000    
 
-#define TEMP_SAFE_EXTRUSION  100.0f 
+#define TEMP_SAFE_EXTRUSION  230.0f 
 
 #define MOTOR_STEPS_PER_REV  200.0f
 #define MICROSTEPPING        32.0f
@@ -70,8 +69,9 @@
 
 #define HEATING_TIMEOUT_MS      300000UL
 #define TEMP_STARTUP_THRESHOLD  100.0f
-#define ADC_DISCONNECTED_LOW    50
-#define ADC_DISCONNECTED_HIGH   4045
+// Rango ADC más estricto para asegurar disparo de alarma antes que T:Err
+#define ADC_DISCONNECTED_LOW    100     // Antes 50
+#define ADC_DISCONNECTED_HIGH   4000    // Antes 4045
 
 // --- FLASH MEMORY SETTINGS (Page 63 for STM32F103C8 - 64KB) ---
 #define FLASH_USER_START_ADDR   0x0800FC00 
@@ -148,9 +148,9 @@ static bool motor_running = false;
 static char tx_buffer[64]; 
 
 PID_Config pid = {  
-    .Kp = 4.0f,
+    .Kp = 2.5f,
     .Ki = 0.15f,
-    .Kd = 10.0f,
+    .Kd = 30.0f,
     .prevError = 0.0f,
     .integral = 0.0f,
     .output = 0.0f
@@ -168,10 +168,8 @@ static uint32_t heating_start_time = 0;
 static bool heating_phase_active = false;
 
 // VARIABLES DE GESTIÓN DE BOTONES FÍSICOS
-// Start (Motor)
-static uint32_t btn_start_timer = 0;
-// Stop (Motor)
-static uint32_t btn_stop_timer = 0;
+// Start (Motor) local en function
+// Stop (Emergency Stop) local en function
 
 // Nuevo Botón Heater (Toggle PB11)
 static bool last_heater_btn_state = true; // Asumimos Pull-up (1 = suelto, 0 = apretado)
@@ -188,6 +186,12 @@ volatile bool uart_cmd_heater_start = false;
 volatile bool uart_cmd_heater_stop = false;
 volatile bool uart_cmd_motor_start = false; // <--- AGREGAR
 volatile bool uart_cmd_motor_stop = false;  // <--- AGREGAR
+
+// --- BUZZER TIMEOUT ---
+uint32_t buzzer_stop_time = 0;
+
+// --- COLD PROTECT MESSAGE TIMEOUT ---
+static uint32_t cold_protect_message_time = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -202,6 +206,18 @@ uint32_t speed_mm_s_to_hz(float speed_mm_s);
 static void check_safety_conditions(void);
 void save_config_to_flash(void);
 void load_config_from_flash(void);
+
+// --- AUXILIARY FUNCTIONS ---
+void beep(uint32_t duration_ms) {
+    HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+    buzzer_stop_time = HAL_GetTick() + duration_ms;
+}
+
+void set_rgb(uint8_t r, uint8_t g, uint8_t b) {
+    HAL_GPIO_WritePin(RGB_R_GPIO_Port, RGB_R_Pin, r ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RGB_G_GPIO_Port, RGB_G_Pin, g ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RGB_B_GPIO_Port, RGB_B_Pin, b ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -312,38 +328,32 @@ static void check_safety_conditions(void) {
     uint16_t adc_avg = sum / ADC_BUF_SIZE;
     
     // Check NTC desconectado
-    if (adc_avg < ADC_DISCONNECTED_LOW || adc_avg > ADC_DISCONNECTED_HIGH) {
-        system_error = ERROR_NTC_DISCONNECTED;
-        pid.output = 0.0f;
-        heater_set(false);
-        motor_state = MOTOR_IDLE; // ⬅️ CORREGIDO (era STATE_IDLE)
-        motor_enable(false);
-        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-        
-        lcd_clear();
-        lcd_put_cur(0, 0);
-        lcd_send_string("ERROR: NTC DISC");
-        lcd_put_cur(1, 0);
-        lcd_send_string("Check Wiring!");
+    // Si ya estamos en error de desconexión, no es necesario re-trigger continuamente
+    // MODIFICADO: Agregamos isnan(tc_filt) como condición de seguridad adicional
+    if (adc_avg < ADC_DISCONNECTED_LOW || adc_avg > ADC_DISCONNECTED_HIGH || isnan(tc_filt)) {
+        if (system_error != ERROR_NTC_DISCONNECTED) {
+            system_error = ERROR_NTC_DISCONNECTED;
+            thermal_state = THERMAL_ERROR; 
+            pid.output = 0.0f;
+            heater_set(false);
+            motor_state = MOTOR_IDLE;
+            motor_enable(false);
+            HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+        }
         return;
     }
     
     // Check Sobretemperatura
     if (!isnan(tc_filt) && tc_filt > T_MAX_C) {
-        system_error = ERROR_OVERTEMP;
-        pid.output = 0.0f;
-        heater_set(false);
-        motor_state = MOTOR_IDLE; // ⬅️ CORREGIDO
-        motor_enable(false);
-        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-        
-        lcd_clear();
-        lcd_put_cur(0, 0);
-        lcd_send_string("OVERTEMP!");
-        lcd_put_cur(1, 0);
-        char temp_str[17];
-        snprintf(temp_str, sizeof(temp_str), "T: %.1f C", tc_filt);
-        lcd_send_string(temp_str);
+        if (system_error != ERROR_OVERTEMP) {
+            system_error = ERROR_OVERTEMP;
+            thermal_state = THERMAL_ERROR;
+            pid.output = 0.0f;
+            heater_set(false);
+            motor_state = MOTOR_IDLE;
+            motor_enable(false);
+            HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+        }
         return;
     }
     
@@ -352,21 +362,14 @@ static void check_safety_conditions(void) {
         if (tc_filt >= TEMP_STARTUP_THRESHOLD) {
             heating_phase_active = false;
         } else if ((HAL_GetTick() - heating_start_time) > HEATING_TIMEOUT_MS) {
-            system_error = ERROR_HEATING_TIMEOUT;
-            pid.output = 0.0f;
-            heater_set(false);
-            
-            lcd_clear();
-            lcd_put_cur(0, 0);
-            lcd_send_string("HEATING TIMEOUT");
-            lcd_put_cur(1, 0);
-            lcd_send_string("Check Heater!");
+            if (system_error != ERROR_HEATING_TIMEOUT) {
+                system_error = ERROR_HEATING_TIMEOUT;
+                thermal_state = THERMAL_ERROR;
+                pid.output = 0.0f;
+                heater_set(false);
+            }
             return;
         }
-    }
-    
-    if (system_error != ERROR_NONE) {
-        system_error = ERROR_NONE;
     }
 }
 
@@ -415,15 +418,27 @@ static void motor_state_machine(void) {
         set_motor_speed(current_freq);
         HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
         step_count = 0;
-        uart_cmd_motor_start = false; // Importante: Limpiar flag UART
+        
+        // CONSUMIR BANDERAS
+        uart_cmd_motor_start = false; 
+        cmd_motor_start = false;
+
+        update_lcd(); // Actualizar LCD inmediatamente
       } 
       // Si intentan arrancar en frío, mostrar aviso
       else if ((cmd_motor_start || uart_cmd_motor_start) && !temp_safe) {
           lcd_put_cur(1, 0);
           lcd_send_string("Cold Protect!   ");
-          uart_cmd_motor_start = false; // Limpiar flag UART
-          HAL_Delay(1000); 
+          cold_protect_message_time = HAL_GetTick(); // Marca tiempo del mensaje
+          
+          // CONSUMIR BANDERAS (Aviso mostrado)
+          uart_cmd_motor_start = false; 
+          cmd_motor_start = false;
       }
+      
+      // Limpieza de seguridad: Si hay orden de stop en IDLE, la limpiamos
+      if (cmd_motor_stop) cmd_motor_stop = false; 
+      if (uart_cmd_motor_stop) uart_cmd_motor_stop = false;
       break;
       
     case MOTOR_ACCEL:
@@ -446,7 +461,12 @@ static void motor_state_machine(void) {
       if (cmd_motor_stop || uart_cmd_motor_stop || !temp_safe) {
         motor_state = MOTOR_DECEL;
         step_count = 0;
-        uart_cmd_motor_stop = false; // Limpiar flag UART
+        
+        // CONSUMIR BANDERAS
+        uart_cmd_motor_start = false; // Cancel start if pending
+        cmd_motor_start = false;
+        uart_cmd_motor_stop = false;
+        cmd_motor_stop = false;
       }
       break;
       
@@ -470,7 +490,12 @@ static void motor_state_machine(void) {
       if (cmd_motor_stop || uart_cmd_motor_stop || !temp_safe) {
         motor_state = MOTOR_DECEL;
         step_count = 0;
-        uart_cmd_motor_stop = false; // Limpiar flag UART
+        
+        // CONSUMIR BANDERAS
+        uart_cmd_motor_start = false; // Cancel start if pending
+        cmd_motor_start = false;
+        uart_cmd_motor_stop = false;
+        cmd_motor_stop = false;
       }
       break;
       
@@ -626,11 +651,49 @@ load_config_from_flash();
     encoder_update();
     
     // 1. INPUTS: Leer botones SIEMPRE
+    // Buzz Timeout
+    if (buzzer_stop_time > 0 && HAL_GetTick() > buzzer_stop_time) {
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+        buzzer_stop_time = 0;
+    }
     handle_physical_buttons(); 
     
-    // 2. MOTOR: Ejecutar solo si pasó 1 milisegundo (Control de Rampa)
+    // 2. ALARMA Y LED (Loop principal - siempre activo)
+    // Prioridad 1: ERROR (Rojo + Alarma sonora)
+    if (system_error != ERROR_NONE) {
+        uint32_t now = HAL_GetTick();
+        // Patrón de Alarma: 500ms ON / 500ms OFF sincronizado
+        if ((now / 500) % 2 == 0) {
+           set_rgb(1, 0, 0); // Rojo ON
+           HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+        } else {
+           set_rgb(0, 0, 0); // LED OFF
+           HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+        }
+        buzzer_stop_time = 0; // Desactivar lógica normal de beeps
+    } 
+    // Prioridad 2: Funcionamiento Normal
+    else {
+        // LED RGB según estado térmico
+        // Verde si está a ±5°C del target (independiente del estado)
+        if (!isnan(tc_filt) && fabs(tc_filt - target_temp) <= 5.0f && thermal_state != THERMAL_IDLE) {
+            set_rgb(0,1,0); // Verde
+        }
+        else if (thermal_state == THERMAL_HEATING) {
+            // Cyan si falta menos de 20°C, Azul si falta más
+            if(tc_filt > (target_temp - 20.0f)) set_rgb(0,1,1); else set_rgb(0,0,1);
+        }
+        else set_rgb(1,1,0); // AMARILLO (Sistema en Reposo - Listo para empezar)
+        
+        // Apagar Buzzer si no hay beep pendiente
+        if (buzzer_stop_time == 0) {
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+        }
+    }
+    
+    // 3. MOTOR: Ejecutar solo si pasó 1 milisegundo (Control de Rampa)
     if (flag_1ms) {
-        motor_state_machine(); 
+        motor_state_machine();
         flag_1ms = false;
     }
     
@@ -725,10 +788,35 @@ load_config_from_flash();
             pid.output = 0.0f;
             heater_on = false;
             
-            if (cmd_motor_stop || cmd_heater_stop) {
+            // "Acknowledge": Solo el botón START limpia el error (Requisito de seguridad)
+            // Esto asegura que el usuario intencionadamente reinicia el sistema.
+            if (cmd_motor_start) {
               system_error = ERROR_NONE;
               thermal_state = THERMAL_IDLE;
+              
+              // Consumir el comando de arranque para que no arranque el motor inmediatamente.
+              // El usuario deberá iniciar calentamiento y luego motor.
+              cmd_motor_start = false;
+              
+              // Limpiar otros comandos pendientes por seguridad
+              uart_cmd_motor_start = false;
+              cmd_heater_start = false;
+              
               lcd_clear();
+            }
+            
+            // Limpiar resto de banderas para evitar comportamientos extraños al salir del error
+            cmd_motor_stop = false;
+            cmd_heater_stop = false;
+            cmd_heater_start = false;
+            // No limpiamos las de UART por si el usuario quiere resetear por UART (aunque el if solo mira cmd_motor_start)
+            // Si quieres permitir UART reset, cambia el if a: if (cmd_motor_start || uart_cmd_motor_start)
+            if (uart_cmd_motor_start) {
+                 // Permitimos Reset por UART también por comodidad en dashboard
+                  system_error = ERROR_NONE;
+                  thermal_state = THERMAL_IDLE;
+                  uart_cmd_motor_start = false;
+                  lcd_clear();
             }
             break;
       }
@@ -788,6 +876,12 @@ load_config_from_flash();
           adc_conversion_complete = false;
           update_lcd();
       }
+      
+      // Restaurar LCD después de mensaje "Cold Protect"
+      if (cold_protect_message_time > 0 && (HAL_GetTick() - cold_protect_message_time) > 800) {
+          cold_protect_message_time = 0;
+          update_lcd();
+      }
     }
     
   }
@@ -795,12 +889,9 @@ load_config_from_flash();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-} // <--- Esta llave cierra el int main(void). ES LA ÚNICA QUE DEBE HABER AQUÍ.
-
-// BORRA TODO LO QUE HAYA ABAJO DE ESTO ANTES DEL 'USER CODE END 3'
-// SI VES OTRAS LLAVES '}' AQUÍ, BÓRRALAS.
-
+  }
   /* USER CODE END 3 */
+
 
 /**
   * @brief System Clock Configuration
@@ -950,34 +1041,54 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 }
 
 void handle_physical_buttons(void) {
-    cmd_motor_start = false;
-    cmd_motor_stop = false;
-    cmd_heater_start = false;
-    cmd_heater_stop = false;
+    // NOTA: NO LIMPIAMOS LOS FLAGS AQUÍ PARA EVITAR PERDER LA ORDEN
+    // SI EL LOOP CORRE MÁS RÁPIDO QUE EL TIMER DE 1MS.
+    // LOS CONSUMIDORES (motor_state_machine, etc) DEBEN LIMPIARLOS.
+    
     uint32_t now = HAL_GetTick();
 
-    // Start
-    if (HAL_GPIO_ReadPin(START_BTN_GPIO_Port, START_BTN_Pin) == GPIO_PIN_RESET) {
-        if ((now - btn_start_timer) > 200) { 
-            cmd_motor_start = true; btn_start_timer = now;
+    // --- START BUTTON (PA4) - MOTOR START ---
+    static bool last_start_state = true;
+    static uint32_t start_timer = 0;
+    bool is_start_pressed = (HAL_GPIO_ReadPin(START_BTN_GPIO_Port, START_BTN_Pin) == GPIO_PIN_RESET);
+    
+    if (is_start_pressed && last_start_state == true) {
+        if ((now - start_timer) > 200) { // Debounce 200ms
+            beep(100);
+            cmd_motor_start = true;
+            start_timer = now;
+            last_start_state = false;
         }
+    } else if (!is_start_pressed) {
+        last_start_state = true;
     }
-    // Stop
-    if (HAL_GPIO_ReadPin(STOP_BTN_GPIO_Port, STOP_BTN_Pin) == GPIO_PIN_RESET) {
-        if ((now - btn_stop_timer) > 200) {
-            cmd_motor_stop = true; btn_stop_timer = now;
+
+    // --- STOP BUTTON (PB12) - MOTOR STOP ---
+    static bool last_stop_state = true;
+    static uint32_t stop_timer = 0;
+    bool is_stop_pressed = (HAL_GPIO_ReadPin(STOP_BTN_GPIO_Port, STOP_BTN_Pin) == GPIO_PIN_RESET);
+    
+    if (is_stop_pressed && last_stop_state == true) {
+        if ((now - stop_timer) > 200) { // Debounce 200ms
+            beep(100);
+            cmd_motor_stop = true;
+            stop_timer = now;
+            last_stop_state = false;
         }
+    } else if (!is_stop_pressed) {
+        last_stop_state = true;
     }
-    // Toggle Heater
+
+    // Toggle Heater (PB11)
     bool is_heater_pressed = (HAL_GPIO_ReadPin(HEATER_BTN_GPIO_Port, HEATER_BTN_Pin) == GPIO_PIN_RESET);
     if (is_heater_pressed && last_heater_btn_state == true) { 
         if ((now - heater_btn_timer) > 300) {
+            beep(50);
+            // Toggle Logic
             if (thermal_state == THERMAL_IDLE || thermal_state == THERMAL_ERROR) {
                 cmd_heater_start = true;
-                lcd_put_cur(1, 0); lcd_send_string("Heater ON...    "); HAL_Delay(500); 
             } else {
                 cmd_heater_stop = true; 
-                lcd_put_cur(1, 0); lcd_send_string("Heater OFF...   "); HAL_Delay(500);
             }
             heater_btn_timer = now;
         }
