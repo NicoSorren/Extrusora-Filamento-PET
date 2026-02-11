@@ -1,0 +1,127 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
+\begin{document}
+
+\tikzset{
+    startstop/.style={ellipse, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=gray!20, thick},
+    process/.style={rectangle, minimum width=3cm, minimum height=0.8cm, text centered, draw=black, fill=blue!10, thick},
+    sensor/.style={rectangle, minimum width=3cm, minimum height=0.8cm, text centered, draw=black, fill=cyan!20, thick},
+    decision/.style={diamond, aspect=2, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!20, thick},
+    statemachine/.style={rectangle, minimum width=3.5cm, minimum height=1.2cm, text centered, draw=black, fill=purple!20, thick, rounded corners=3pt},
+    output/.style={rectangle, minimum width=3cm, minimum height=0.8cm, text centered, draw=black, fill=green!20, thick},
+    arrow/.style={thick,-Stealth},
+    yes/.style={arrow, color=green!60!black},
+    no/.style={arrow, color=red!60!black},
+}
+
+\begin{tikzpicture}[node distance=1.2cm, auto]
+
+% Nodo inicial
+\node (start) [startstop] {Inicio Loop};
+
+% 1. IWDG
+\node (iwdg) [process, below=of start] {Refresh IWDG};
+
+% 2. Buzzer timeout
+\node (buzzer) [process, below=of iwdg] {Buzzer Timeout\\(apagar si expiró)};
+
+% 3. Gestionar alarmas
+\node (alarmas) [process, below=of buzzer] {Gestionar Alarmas\\(LED + Buzzer patterns)};
+
+% 4. Leer inputs
+\node (inputs) [sensor, below=of alarmas] {Leer Botones, Encoder\\encoder\_update()\\handle\_physical\_buttons()};
+
+% 5. Decisión flag_1ms
+\node (dec_1ms) [decision, below=of inputs, yshift=-0.5cm] {¿flag\_1ms?};
+\node (motor) [statemachine, right=2.5cm of dec_1ms] {Máquina Estados Motor\\(IDLE/ACCEL/RUN/DECEL)};
+\node (no_1ms) [coordinate, below=0.6cm of dec_1ms] {};
+
+% 6. Decisión menú activo
+\node (dec_menu) [decision, below=of dec_1ms, yshift=-0.5cm] {¿Menú Activo?\\(encoder\_button\\\_long\_press)};
+\node (menu_update) [process, right=2.5cm of dec_menu] {Actualizar Menú\\(navegación, edición)};
+\node (no_menu) [coordinate, below=0.6cm of dec_menu] {};
+
+% 7. Decisión flag_100ms
+\node (dec_100ms) [decision, below=of dec_menu, yshift=-0.5cm] {¿flag\_100ms?};
+\node (start_adc) [sensor, right=2.5cm of dec_100ms] {Iniciar Conversión\\ADC DMA\\(64 samples)};
+\node (no_100ms) [coordinate, below=0.6cm of dec_100ms] {};
+
+% 8. Decisión adc_conversion_complete (procesamiento)
+\node (dec_adc_process) [decision, below=of dec_100ms, yshift=-0.5cm] {¿Datos ADC\\Listos?};
+\node (adc_process) [sensor, right=2.5cm of dec_adc_process] {Procesar ADC\\+ Seguridad\\(temp, desconexión, etc.)};
+\node (no_adc_process) [coordinate, below=0.6cm of dec_adc_process] {};
+
+% 9. MÁQUINA TÉRMICA (SIEMPRE SE EJECUTA)
+\node (thermal) [statemachine, below=of dec_adc_process, yshift=-0.5cm] {
+    \textbf{Máquina Estados Térmica}\\
+    \small{(SIEMPRE se ejecuta)}\\
+    \tiny{IDLE → HEATING → READY → ERROR}
+};
+
+% Comentario explicativo
+\node (thermal_note) [right=0.3cm of thermal, text width=3.5cm, font=\tiny, align=left] {
+    \textbf{Dentro del switch:}\\
+    - Detecta botones SIEMPRE\\
+    - Cambia estados\\
+    - Calcula PID si hay datos\\
+    - UART + LCD al final
+};
+
+% 10. Aplicar calentador
+\node (heater) [output, below=of thermal] {Aplicar Estado Calentador\\heater\_set(heater\_on)};
+
+% Loop back
+\node (loop_back) [below=0.8cm of heater] {};
+\coordinate (return_point) at ($(start.west) + (-2cm, 0)$);
+
+% FLECHAS PRINCIPALES (flujo lineal)
+\draw [arrow] (start) -- (iwdg);
+\draw [arrow] (iwdg) -- (buzzer);
+\draw [arrow] (buzzer) -- (alarmas);
+\draw [arrow] (alarmas) -- (inputs);
+\draw [arrow] (inputs) -- (dec_1ms);
+
+% Flag 1ms
+\draw [yes] (dec_1ms) -- node[above] {Sí} (motor);
+\draw [arrow] (motor) |- (no_1ms);
+\draw [no] (dec_1ms) -- node[right, xshift=-0.2cm] {No} (no_1ms);
+\draw [arrow] (no_1ms) -- (dec_menu);
+
+% Menú
+\draw [yes] (dec_menu) -- node[above] {Sí} (menu_update);
+\draw [arrow] (menu_update) |- (no_menu);
+\draw [no] (dec_menu) -- node[right, xshift=-0.2cm] {No} (no_menu);
+\draw [arrow] (no_menu) -- (dec_100ms);
+
+% Flag 100ms
+\draw [yes] (dec_100ms) -- node[above] {Sí} (start_adc);
+\draw [arrow] (start_adc) |- (no_100ms);
+\draw [no] (dec_100ms) -- node[right, xshift=-0.2cm] {No} (no_100ms);
+\draw [arrow] (no_100ms) -- (dec_adc_process);
+
+% ADC Processing
+\draw [yes] (dec_adc_process) -- node[above] {Sí} (adc_process);
+\draw [arrow] (adc_process) |- (no_adc_process);
+\draw [no] (dec_adc_process) -- node[right, xshift=-0.2cm] {No} (no_adc_process);
+\draw [arrow] (no_adc_process) -- (thermal);
+
+% MÁQUINA TÉRMICA (flujo directo, SIEMPRE)
+\draw [arrow, very thick, color=purple!70] (thermal) -- (heater) node[midway, right, font=\small, color=purple!70] {SIEMPRE};
+
+% Heater a loop
+\draw [arrow] (heater) -- (loop_back);
+
+% Loop back to start
+\draw [arrow] (loop_back) -| (return_point) |- (start);
+
+% Cuadro de énfasis para máquina térmica
+\begin{scope}[on background layer]
+    \node[fit=(thermal)(thermal_note), fill=purple!5, draw=purple!50, thick, rounded corners, inner sep=8pt] {};
+\end{scope}
+
+\end{tikzpicture}
+
+\end{document}

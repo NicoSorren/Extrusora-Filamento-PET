@@ -410,7 +410,8 @@ A continuación se describe el flujo típico de operación del sistema:
         \node[process, below=of start] (init) {Inicializar periféricos \\ Cargar Config Flash \\ Arrancar TIM3, ADC \\ Estados $\rightarrow$ IDLE};
         \node[process, below=of init, fill=yellow!20, text width=2.5cm] (loop) {\textbf{WHILE}};
         \node[process, below=of loop] (wdg) {Refrescar Watchdog};
-        \node[process, below=of wdg] (inputs) {Leer botones \\ encoder, UART};
+        \node[process, below=of wdg, fill=red!15] (alarm) {Gestionar Alarma/LED \\ (Error o Normal)};
+        \node[process, below=of alarm] (inputs) {Leer botones \\ encoder, UART};
         \node[decision, below=of inputs, yshift=-0.4cm] (flag1ms) {¿flag\_1ms?};
         \node[decision, below=of flag1ms, yshift=-0.4cm] (flag100ms) {¿flag\_100ms?};
         \node[process, below=of flag100ms, yshift=-0.2cm] (lcd) {Actualizar LCD};
@@ -449,7 +450,8 @@ A continuación se describe el flujo típico de operación del sistema:
         \draw[arrow] (start) -- (init);
         \draw[arrow] (init) -- (loop);
         \draw[arrow] (loop) -- (wdg);
-        \draw[arrow] (wdg) -- (inputs);
+        \draw[arrow] (wdg) -- (alarm);
+        \draw[arrow] (alarm) -- (inputs);
         
         % Flecha de inputs a flag1ms CON PUNTO MEDIO para conectar a error_check
         \draw[arrow] (inputs) -- (flag1ms) coordinate[midway] (check1);

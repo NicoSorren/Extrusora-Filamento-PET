@@ -1,8 +1,151 @@
-2026-02-07 10:31:19,607 [INFO] WebApp:194 - Connection lost
-2026-02-07 10:31:23,107 [INFO] WebApp:191 - Connection restablished
-2026-02-07 10:47:05,494 [INFO] WebApp:194 - Connection lost
-2026-02-07 10:47:05,636 [INFO] WebApp:191 - Connection restablished
-2026-02-07 10:47:19,446 [INFO] WebApp:194 - Connection lost
-2026-02-07 10:47:19,565 [INFO] WebApp:191 - Connection restablished
-2026-02-07 10:47:23,989 [INFO] WebApp:194 - Connection lost
-2026-02-07 10:47:24,127 [INFO] WebApp:191 - Connection restablished
+2026-02-11 00:00:20,345 [INFO] Gpio:278 - dependency for GPIO [ADC1, I2C1, RCC, TIM1, TIM4, USART1]
+2026-02-11 00:00:20,406 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-02-11 00:00:20,554 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,555 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,555 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,555 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,595 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,595 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,629 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,629 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:20,666 [INFO] Gpio:278 - dependency for GPIO [ADC1, I2C1, RCC, TIM1, TIM4, USART1]
+2026-02-11 00:00:20,713 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-02-11 00:00:47,082 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 794576208 Bytes (1073741824)
+2026-02-11 00:00:47,264 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 812606720 Bytes (1073741824)
+2026-02-11 00:00:49,198 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 885275984 Bytes (1073741824)
+2026-02-11 00:00:50,181 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2026-02-11 00:00:50,181 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-02-11 00:00:50,181 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: IWDG
+2026-02-11 00:00:50,181 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: DMA
+2026-02-11 00:00:50,181 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: ADC
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2026-02-11 00:00:50,182 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: I2C
+2026-02-11 00:00:50,183 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2026-02-11 00:00:50,189 [INFO] Argument:325 - Argument : hdmavalue: null
+2026-02-11 00:00:50,189 [INFO] Argument:327 - 	 sub Args: 
+2026-02-11 00:00:50,189 [INFO] Argument:325 - Argument : Instancevalue: DMA1_Channel1
+2026-02-11 00:00:50,190 [INFO] Argument:335 - Argument : Instancevalue: DMA1_Channel1
+2026-02-11 00:00:50,190 [INFO] Argument:325 - Argument : Initvalue: null
+2026-02-11 00:00:50,190 [INFO] Argument:327 - 	 sub Args: 
+2026-02-11 00:00:50,190 [INFO] Argument:325 - Argument : Directionvalue: DMA_PERIPH_TO_MEMORY
+2026-02-11 00:00:50,190 [INFO] Argument:335 - Argument : Directionvalue: DMA_PERIPH_TO_MEMORY
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : PeriphIncvalue: DMA_PINC_DISABLE
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : PeriphIncvalue: DMA_PINC_DISABLE
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : MemIncvalue: DMA_MINC_ENABLE
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : MemIncvalue: DMA_MINC_ENABLE
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : PeriphDataAlignmentvalue: DMA_PDATAALIGN_HALFWORD
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : PeriphDataAlignmentvalue: DMA_PDATAALIGN_HALFWORD
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : MemDataAlignmentvalue: DMA_MDATAALIGN_HALFWORD
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : MemDataAlignmentvalue: DMA_MDATAALIGN_HALFWORD
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : Modevalue: DMA_NORMAL
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : Modevalue: DMA_NORMAL
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : Priorityvalue: DMA_PRIORITY_LOW
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : Priorityvalue: DMA_PRIORITY_LOW
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : Lockvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : Lockvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : Statevalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : Statevalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : Parentvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : Parentvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : XferCpltCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : XferCpltCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : XferHalfCpltCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : XferHalfCpltCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : XferErrorCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : XferErrorCallbackvalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:325 - Argument : ErrorCodevalue: null
+2026-02-11 00:00:50,191 [INFO] Argument:335 - Argument : ErrorCodevalue: null
+2026-02-11 00:00:50,192 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:50,192 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : hdmavalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:327 - 	 sub Args: 
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Instancevalue: DMA1_Channel4
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Instancevalue: DMA1_Channel4
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Initvalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:327 - 	 sub Args: 
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Directionvalue: DMA_MEMORY_TO_PERIPH
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Directionvalue: DMA_MEMORY_TO_PERIPH
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : PeriphIncvalue: DMA_PINC_DISABLE
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : PeriphIncvalue: DMA_PINC_DISABLE
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : MemIncvalue: DMA_MINC_ENABLE
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : MemIncvalue: DMA_MINC_ENABLE
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : PeriphDataAlignmentvalue: DMA_PDATAALIGN_BYTE
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : PeriphDataAlignmentvalue: DMA_PDATAALIGN_BYTE
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : MemDataAlignmentvalue: DMA_MDATAALIGN_BYTE
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : MemDataAlignmentvalue: DMA_MDATAALIGN_BYTE
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Modevalue: DMA_NORMAL
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Modevalue: DMA_NORMAL
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Priorityvalue: DMA_PRIORITY_LOW
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Priorityvalue: DMA_PRIORITY_LOW
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Lockvalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Lockvalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Statevalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:335 - Argument : Statevalue: null
+2026-02-11 00:00:50,211 [INFO] Argument:325 - Argument : Parentvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:335 - Argument : Parentvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:325 - Argument : XferCpltCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:335 - Argument : XferCpltCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:325 - Argument : XferHalfCpltCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:335 - Argument : XferHalfCpltCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:325 - Argument : XferErrorCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:335 - Argument : XferErrorCallbackvalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:325 - Argument : ErrorCodevalue: null
+2026-02-11 00:00:50,212 [INFO] Argument:335 - Argument : ErrorCodevalue: null
+2026-02-11 00:00:50,296 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\MXTmpFiles\license.tmp_save
+2026-02-11 00:00:50,484 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\MXTmpFiles\license.tmp
+2026-02-11 00:00:50,554 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\gpio.c_save
+2026-02-11 00:00:50,689 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\gpio.c
+2026-02-11 00:00:50,700 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\gpio.h_save
+2026-02-11 00:00:50,805 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\gpio.h
+2026-02-11 00:00:51,332 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\adc.c_save
+2026-02-11 00:00:51,481 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\adc.c
+2026-02-11 00:00:51,491 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\adc.h_save
+2026-02-11 00:00:51,585 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\adc.h
+2026-02-11 00:00:51,767 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\dma.c_save
+2026-02-11 00:00:52,040 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\dma.c
+2026-02-11 00:00:52,081 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\dma.h_save
+2026-02-11 00:00:52,251 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\dma.h
+2026-02-11 00:00:52,287 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\i2c.c_save
+2026-02-11 00:00:52,472 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\i2c.c
+2026-02-11 00:00:52,488 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\i2c.h_save
+2026-02-11 00:00:52,631 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\i2c.h
+2026-02-11 00:00:52,660 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\iwdg.c_save
+2026-02-11 00:00:52,866 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\iwdg.c
+2026-02-11 00:00:52,881 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\iwdg.h_save
+2026-02-11 00:00:53,034 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\iwdg.h
+2026-02-11 00:00:53,063 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\tim.c_save
+2026-02-11 00:00:53,373 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\tim.c
+2026-02-11 00:00:53,447 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\tim.h_save
+2026-02-11 00:00:53,607 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\tim.h
+2026-02-11 00:00:53,685 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\usart.c_save
+2026-02-11 00:00:53,973 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\usart.c
+2026-02-11 00:00:53,991 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\usart.h_save
+2026-02-11 00:00:54,131 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\usart.h
+2026-02-11 00:00:54,181 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\stm32f1xx_it.c_save
+2026-02-11 00:00:54,434 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\stm32f1xx_it.c
+2026-02-11 00:00:54,670 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\stm32f1xx_it.h_save
+2026-02-11 00:00:54,925 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\stm32f1xx_it.h
+2026-02-11 00:00:54,989 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\stm32f1xx_hal_msp.c_save
+2026-02-11 00:00:55,160 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\stm32f1xx_hal_msp.c
+2026-02-11 00:00:55,171 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\MXTmpFiles\system.tmp_save
+2026-02-11 00:00:55,277 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\MXTmpFiles\system.tmp
+2026-02-11 00:00:55,302 [INFO] CodeEngine:321 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\stm32f1xx_hal_conf.h_save
+2026-02-11 00:00:55,426 [INFO] CodeEngine:345 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\stm32f1xx_hal_conf.h
+2026-02-11 00:00:55,507 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\main.h_save
+2026-02-11 00:00:55,629 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Inc\main.h
+2026-02-11 00:00:55,646 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\main.c_save
+2026-02-11 00:00:55,881 [INFO] CodeEngine:289 - Generated code: C:\Users\nsorr\STM32CubeIDE\workspace_1.19.0\PET_Extruder\Core\Src\main.c
+2026-02-11 00:00:56,714 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 339mS.
+2026-02-11 00:00:56,722 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2026-02-11 00:00:56,884 [INFO] ConfigFileManager:1595 - The Die is : DIE410
+2026-02-11 00:00:59,429 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 2707mS.
+2026-02-11 00:00:59,430 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 1mS.
+2026-02-11 00:00:59,440 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 0mS.
+2026-02-11 00:17:28,966 [INFO] WebApp:194 - Connection lost
+2026-02-11 00:17:29,145 [INFO] WebApp:191 - Connection restablished

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1770418199.41993 "c:/Users/nsorr/STM32CubeIDE/workspace_1.19.0/PET_Extruder/informe.tex" "informe.pdf" "informe" 1770418200.48831 0
+["pdflatex"] 1770474103.99868 "c:/Users/nsorr/STM32CubeIDE/workspace_1.19.0/PET_Extruder/informe.tex" "informe.pdf" "informe" 1770474105.16731 0
   "C:/Users/nsorr/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1770386056 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/nsorr/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcbx1200.pk" 1770387996 15080 9f3bce6da231de3896e68c785dbba69a ""
   "C:/Users/nsorr/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1200.pk" 1770386060 14064 8d4f8b1d5d13cd843c63f7862df10013 ""
@@ -150,11 +150,11 @@
   "C:/Users/nsorr/AppData/Local/Programs/MiKTeX/tex/latex/pgf/utilities/pgfrcs.sty" 1673775190 325 f9f16d12354225b7dd52a3321f085955 ""
   "C:/Users/nsorr/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "Mapa conceptual.pdf" 1770310531 34696 e2e677e4a974d6f9ea220971254d1c43 ""
-  "c:/Users/nsorr/STM32CubeIDE/workspace_1.19.0/PET_Extruder/informe.tex" 1770418198 32058 617922eabf33d8721b2f9e72a9907218 ""
+  "c:/Users/nsorr/STM32CubeIDE/workspace_1.19.0/PET_Extruder/informe.tex" 1770474101 32205 90a811b1230dcc5b264816ddc57bcca7 ""
   "circuito_heater.png" 1770387071 35122 ad4d708c72bd255be3935e9a5a4ee25e ""
-  "informe.aux" 1770418200 5969 5a5c0f67104e133221279c4648a09e3e "pdflatex"
-  "informe.tex" 1770418198 32058 617922eabf33d8721b2f9e72a9907218 ""
-  "informe.toc" 1770418200 3251 868386075a5a376e2377a5bf6a43aba3 "pdflatex"
+  "informe.aux" 1770474104 5969 5a5c0f67104e133221279c4648a09e3e "pdflatex"
+  "informe.tex" 1770474101 32205 90a811b1230dcc5b264816ddc57bcca7 ""
+  "informe.toc" 1770474104 3251 868386075a5a376e2377a5bf6a43aba3 "pdflatex"
   (generated)
   "informe.aux"
   "informe.log"

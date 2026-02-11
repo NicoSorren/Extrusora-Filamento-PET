@@ -1,0 +1,2 @@
+Timestamp_PC,Event_Type,Description,Last_Temp,Last_Target
+2026-02-11 00:40:51,ERROR_TRIGGERED,Safety System Triggered: NTC_DISCONNECTED,0.0,245.0

@@ -107,8 +107,14 @@ static inline float ntc_temp_c_from_adc(uint16_t adc) {
   return (1.0f / inv_t) - 273.15f;
 }
 
-static inline void heater_set(bool on) {
-  HAL_GPIO_WritePin(HEATER_EN_GPIO_Port, HEATER_EN_Pin, on ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
+
+// Control PWM del heater (duty cycle 0-100%)
+static inline void heater_set_pwm(float power_percent) {
+    if (power_percent < 0.0f) power_percent = 0.0f;
+    if (power_percent > 100.0f) power_percent = 100.0f;
+    uint32_t duty = (uint32_t)(power_percent * 100.0f); // 0-100% -> 0-9999
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, duty);
 }
 
 static inline void motor_enable(bool en) {
@@ -129,7 +135,7 @@ static void set_motor_speed(uint16_t freq_hz) {
 
 /* USER CODE BEGIN PV */
 uint32_t error_count = 0;
-float target_temp = 250.0f;
+float target_temp = 245.0f;  // Temperatura inicial consistente con defaults
 static uint16_t adc_buffer[ADC_BUF_SIZE];
 volatile bool adc_conversion_complete = false;  
 volatile bool flag_100ms = false;              
@@ -148,9 +154,9 @@ static bool motor_running = false;
 static char tx_buffer[64]; 
 
 PID_Config pid = {  
-    .Kp = 2.5f,
-    .Ki = 0.15f,
-    .Kd = 30.0f,
+    .Kp = 1.0f,   // Balanceado: suficiente ganancia sin overshoot extremo
+    .Ki = 0.15f,  // Mantener integral suave
+    .Kd = 60.0f,  // Alto para buena anticipación de overshoot
     .prevError = 0.0f,
     .integral = 0.0f,
     .output = 0.0f
@@ -278,11 +284,11 @@ void load_config_from_flash(void) {
 }
 
 void restore_defaults(void) {
-    target_temp = 250.0f;
+    target_temp = 245.0f;
     target_speed_mm_s = 3.0f;
-    pid.Kp = 4.0f;
+    pid.Kp = 1.0f;   // Balanceado
     pid.Ki = 0.15f;
-    pid.Kd = 10.0f;
+    pid.Kd = 60.0f;  // Alto para anticipación
     save_config_to_flash(); // Guardar defaults inmediatamente
 }
 
@@ -335,7 +341,7 @@ static void check_safety_conditions(void) {
             system_error = ERROR_NTC_DISCONNECTED;
             thermal_state = THERMAL_ERROR; 
             pid.output = 0.0f;
-            heater_set(false);
+            heater_set_pwm(0.0f);
             motor_state = MOTOR_IDLE;
             motor_enable(false);
             HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
@@ -349,7 +355,7 @@ static void check_safety_conditions(void) {
             system_error = ERROR_OVERTEMP;
             thermal_state = THERMAL_ERROR;
             pid.output = 0.0f;
-            heater_set(false);
+            heater_set_pwm(0.0f);
             motor_state = MOTOR_IDLE;
             motor_enable(false);
             HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
@@ -366,7 +372,7 @@ static void check_safety_conditions(void) {
                 system_error = ERROR_HEATING_TIMEOUT;
                 thermal_state = THERMAL_ERROR;
                 pid.output = 0.0f;
-                heater_set(false);
+                heater_set_pwm(0.0f);
             }
             return;
         }
@@ -558,7 +564,7 @@ static void update_lcd(void) {
   if (motor_state == MOTOR_IDLE) {
       if (thermal_state == THERMAL_IDLE) {
           // Solo pedimos START si está todo apagado
-          snprintf(lcd_line2, sizeof(lcd_line2), "Press START"); 
+          snprintf(lcd_line2, sizeof(lcd_line2), "Press START     "); // 16 chars con espacios
       } 
       else if (thermal_state == THERMAL_HEATING) {
           // Si está calentando, mostramos progreso
@@ -621,22 +627,23 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_IWDG_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   
-lcd_init();
-lcd_clear();
-encoder_init();
-menu_init();  // ⬅️ AGREGAR ESTA LÍNEA
+  lcd_init();
+  lcd_clear();
+  encoder_init();
+  menu_init();
 
-// CARGAR CONFIGURACION GUARDADA
-load_config_from_flash();
+  // CARGAR CONFIGURACION GUARDADA
+  load_config_from_flash();
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUF_SIZE);
   HAL_TIM_Base_Start_IT(&htim3);
   
   motor_enable(false); 
   HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, direction_cw ? GPIO_PIN_SET : GPIO_PIN_RESET);
-  heater_set(false);
+  heater_set_pwm(0.0f);
   
   HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
   
@@ -648,18 +655,14 @@ load_config_from_flash();
   {
     HAL_IWDG_Refresh(&hiwdg);
     
-    encoder_update();
-    
-    // 1. INPUTS: Leer botones SIEMPRE
-    // Buzz Timeout
+    // 1. BUZZER TIMEOUT: Apagar beeps temporales expirados
     if (buzzer_stop_time > 0 && HAL_GetTick() > buzzer_stop_time) {
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
         buzzer_stop_time = 0;
     }
-    handle_physical_buttons(); 
     
-    // 2. ALARMA Y LED (Loop principal - siempre activo)
-    // Prioridad 1: ERROR (Rojo + Alarma sonora)
+    // 2. ALARMA Y LED (Prioridad 1 - Feedback de seguridad inmediato)
+    // ERROR: Rojo + Alarma sonora
     if (system_error != ERROR_NONE) {
         uint32_t now = HAL_GetTick();
         // Patrón de Alarma: 500ms ON / 500ms OFF sincronizado
@@ -691,7 +694,11 @@ load_config_from_flash();
         }
     }
     
-    // 3. MOTOR: Ejecutar solo si pasó 1 milisegundo (Control de Rampa)
+    // 3. INPUTS: Leer estado de controles físicos y encoder
+    encoder_update();
+    handle_physical_buttons();
+    
+    // 4. MOTOR: Ejecutar solo si pasó 1 milisegundo (Control de Rampa)
     if (flag_1ms) {
         motor_state_machine();
         flag_1ms = false;
@@ -703,7 +710,8 @@ load_config_from_flash();
       if (encoder_button_pressed()) menu_handle_button_short();
       if (encoder_button_long_press()) menu_handle_button_long();
       
-    } else {
+    } 
+    else {
       
       if (encoder_button_long_press()) {
         menu_enter();
@@ -722,12 +730,17 @@ load_config_from_flash();
         check_safety_conditions(); // Puede cambiar thermal_state a ERROR
       }
         
-      // 4. LÓGICA TÉRMICA (Ejecutar SIEMPRE para detectar botones)
+      // 5. LÓGICA TÉRMICA (Ejecutar SIEMPRE para detectar botones)
       switch (thermal_state) {
           
           case THERMAL_IDLE:
             pid.output = 0.0f;
             heater_on = false;
+            heating_phase_active = false;  // ✅ Asegurar que está limpio en IDLE
+            
+            // Limpiar comandos de stop si llegan estando ya apagado
+            if (cmd_heater_stop) cmd_heater_stop = false;
+            if (uart_cmd_heater_stop) uart_cmd_heater_stop = false;
             
             // ⬇️ MODIFICADO: Aceptar botón Físico (cmd) O comando UART (uart_cmd)
             if ((cmd_heater_start || uart_cmd_heater_start) && !isnan(tc_filt)) {
@@ -735,7 +748,8 @@ load_config_from_flash();
                 heating_phase_active = true;
                 heating_start_time = HAL_GetTick();
                 
-                // Limpiamos bandera UART
+                // Limpiar banderas
+                cmd_heater_start = false;
                 uart_cmd_heater_start = false; 
                 
                 if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Start\r\n", 12, 100);
@@ -743,10 +757,17 @@ load_config_from_flash();
             break;
             
           case THERMAL_HEATING:
+            // Limpiar comandos de start si llegan estando ya calentando
+            if (cmd_heater_start) cmd_heater_start = false;
+            if (uart_cmd_heater_start) uart_cmd_heater_start = false;
+            
             // Calcular PID solo si hay datos nuevos (cada 100ms)
             if (adc_conversion_complete) {
                 pid.output = PID_Compute(&pid, target_temp, tc_filt, 0.1f);
-                heater_on = (pid.output > 1.0f);
+                
+                // Umbral simple: 3% de potencia PID
+                // El PID con Kd alto previene overshoot naturalmente
+                heater_on = (pid.output > 3.0f);
                 
                 // Chequear si llegamos al target
                 if (!isnan(tc_filt) && fabs(tc_filt - target_temp) < 5.0f) {
@@ -759,7 +780,9 @@ load_config_from_flash();
             // ⬇️ MODIFICADO: Apagado manual Físico o UART
             if (cmd_heater_stop || uart_cmd_heater_stop) {
                 thermal_state = THERMAL_IDLE;
-                uart_cmd_heater_stop = false; // Limpiar bandera UART
+                heating_phase_active = false;  // ✅ Limpiar timer de timeout
+                cmd_heater_stop = false;
+                uart_cmd_heater_stop = false;
                 if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Stop\r\n", 12, 100);
             }
             
@@ -767,9 +790,13 @@ load_config_from_flash();
             break;
             
           case THERMAL_READY:
+             // Limpiar comandos de start si llegan estando ya listo
+             if (cmd_heater_start) cmd_heater_start = false;
+             if (uart_cmd_heater_start) uart_cmd_heater_start = false;
+             
              if (adc_conversion_complete) {
                 pid.output = PID_Compute(&pid, target_temp, tc_filt, 0.1f);
-                heater_on = (pid.output > 1.0f);
+                heater_on = (pid.output > 3.0f);  // Umbral simple
              }
             
             // ⬇️ MODIFICADO: Apagado manual Físico o UART
@@ -777,7 +804,9 @@ load_config_from_flash();
                 thermal_state = THERMAL_IDLE;
                 pid.output = 0.0f;
                 heater_on = false;
-                uart_cmd_heater_stop = false; // Limpiar bandera UART
+                heating_phase_active = false;  // ✅ Limpiar timer de timeout
+                cmd_heater_stop = false;
+                uart_cmd_heater_stop = false;
                 if (huart1.gState == HAL_UART_STATE_READY) HAL_UART_Transmit(&huart1, (uint8_t*)"[TH] Stop\r\n", 12, 100);
             }
             
@@ -821,8 +850,8 @@ load_config_from_flash();
             break;
       }
       
-      // 5. SALIDA FÍSICA (CRÍTICO: APLICAR EL VALOR AL PIN)
-      heater_set(heater_on);
+      // 6. SALIDA FÍSICA (CRÍTICO: APLICAR EL VALOR AL PIN)
+      heater_set_pwm((thermal_state == THERMAL_IDLE) ? 0.0f : pid.output);
       
       // CAMBIO AQUI: Quitamos la condición restrictiva huart1.gState.
       // Solo chequeamos si hay nuevos datos (adc_conversion_complete)
@@ -1130,14 +1159,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (counter_100ms >= 100) {
       flag_100ms = true;
       
-      // TRUCO MAESTRO:
-      // Activamos 'adc_conversion_complete' aquí para evitar conflictos de interrupciones.
-      // Esto engaña al main loop para que procese los datos y los envíe al Dashboard.
-      adc_conversion_complete = true; 
+      // IMPLEMENTACIÓN IDEAL:
+      // Ya NO activamos adc_conversion_complete aquí.
+      // Esperamos a que el callback del ADC DMA lo active cuando realmente termine (~1.3ms después)
       
       counter_100ms = 0;
     }
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   }
+  /* USER CODE END 3 */
 }
 
 /* USER CODE END 4 */

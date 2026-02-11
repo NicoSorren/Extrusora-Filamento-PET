@@ -89,7 +89,7 @@ void send_config_report(void);
 #define DRV_FAULT_Pin GPIO_PIN_11
 #define DRV_FAULT_GPIO_Port GPIOA
 #define DRV_FAULT_EXTI_IRQn EXTI15_10_IRQn
-#define HEATER_EN_Pin GPIO_PIN_5
+#define HEATER_EN_Pin GPIO_PIN_8
 #define HEATER_EN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
